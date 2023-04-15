@@ -17,6 +17,7 @@ Since openai have released a limited amount of tokens so the response will not b
 ## Scopes of use:
 * You can easily create a question and answer bot
 * It can be trained on any novel or book and then using prompt engineering it can behave like any character from that book
+* With help of prompt engineering you can use for any purpose you want
 
 Sources/inspirations:
 
