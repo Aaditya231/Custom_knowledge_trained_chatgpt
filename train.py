@@ -23,7 +23,7 @@ def construct_index(directory_path):
         documents, llm_predictor=llm_predictor, prompt_helper=prompt_helper
     )
 
-    index.save_to_disk('index1.json')
+    index.save_to_disk('index.json')
 
     return index
 
