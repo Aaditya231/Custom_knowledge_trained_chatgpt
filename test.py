@@ -37,7 +37,8 @@ def ask_me(question,prompt):
 
 
 # construct_index('textdata')
-
+# An endless while loop is generated so that you can keep asking questions and not have to run it each time
+# The prompt provides it with previous questions to get the best response
 prompt = "Below is the conversation you just had so answer accordingly\n"
 count = 0
 while count < 5:
