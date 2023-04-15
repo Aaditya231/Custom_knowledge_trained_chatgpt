@@ -1,0 +1,2052 @@
+LinkedTrust
+Open source tools for filtering, cleaning and aggregating trust claims
+
+Uses ComposeDB to publish LinkedTrust claims
+
+Use these libraries and commands from anywhere
+
+In order to write claims, a user session must be created as per https: // composedb.js.org/docs/preview/guides/composedb-client/user-sessions
+
+The high level examples and the Rebooting Web of Trust demo app are now in the LinkedClaims repo
+
+The Linkedtrust repo is a monorepo with the following packages:
+LISCENSE
+README.md
+a folder named schemas with the schemas for the LinkedTrust claims, it contains three code files
+file1: runtime-trustclaims.json:
+{
+    "models" : {"LinkedClaim" : {"id" : "kjzl6hvfrbw6caqzq7d4hvvr7uvg3avkfg1x1wwxf443trsnov3izx3znbp3jq6", "accountRelation" : {"type" : "list"}}}, "objects" : {"LinkedClaimMeasure" : {"unit" : {"type" : "string", "required" : false}, "value" : {"type" : "float", "required" : true}, "howMeasured" : {"type" : "string", "required" : false}}, "LinkedClaimNormalizedRating" : {"score" : {"type" : "float", "required" : true}, "stars" : {"type" : "integer", "required" : false}, "aspect" : {"type" : "string", "required" : false}}, "LinkedClaimClaimSource" : {"author" : {"type" : "string", "required" : false}, "curator" : {"type" : "string", "required" : false}, "howKnown" : {"type" : "reference", "refType" : "enum", "refName" : "LinkedClaimHowKnown", "required" : false}, "sourceID" : {"type" : "string", "required" : false}, "dateObserved" : {"type" : "date", "required" : false}, "digestMultibase" : {"type" : "string", "required" : false}}, "LinkedClaimSharing" : {"respondAt" : {"type" : "string", "required" : true}, "intendedAudience" : {"type" : "string", "required" : false}}, "LinkedClaim" : {"amt" : {"type" : "reference", "refType" : "object", "refName" : "LinkedClaimMeasure", "required" : false}, "claim" : {"type" : "string", "required" : true}, "object" : {"type" : "string", "required" : false}, "rating" : {"type" : "reference", "refType" : "object", "refName" : "LinkedClaimNormalizedRating", "required" : false}, "source" : {"type" : "reference", "refType" : "object", "refName" : "LinkedClaimClaimSource", "required" : false}, "sharing" : {"type" : "reference", "refType" : "object", "refName" : "LinkedClaimSharing", "required" : false}, "statement" : {"type" : "string", "required" : false}, "subjectID" : {"type" : "string", "required" : true}, "confidence" : {"type" : "float", "required" : false}, "subjectName" : {"type" : "string", "required" : false}, "subjectType" : {"type" : "reference", "refType" : "enum", "refName" : "LinkedClaimSubjectType", "required" : false}, "effectiveDate" : {"type" : "date", "required" : false}}}, "enums" : {"LinkedClaimHowKnown" : [ "FIRST_HAND", "SECOND_HAND", "WEB_DOCUMENT", "VERIFIED_LOGIN", "BLOCKCHAIN", "SIGNED_DOCUMENT", "PHYSICAL_DOCUMENT", "INTEGRATION", "RESEARCH", "OPINION", "OTHER" ], "LinkedClaimSubjectType" : [ "PERSON", "ORGANIZATION", "PRODUCT", "EVENT", "PLACE", "ENTITY", "ACTION", "DOCUMENT", "CLAIM", "IDEA", "THING", "OTHER" ]}, "accountData":
+    {
+        "linkedClaimList": { "type" : "connection", "name" : "LinkedClaim" }
+    }
+}
+
+file2 : trustclaims.graphql : type LinkedClaim @createModel(
+                                  accountRelation
+                                  : LIST,
+                                    description
+                                  : "Claim or attestation, possibly from 3rd party sources")
+{
+subjectID:
+    String !@string(minLength : 1, maxLength : 1024)
+        subjectType : SubjectType
+                          subjectName : String @string(minLength : 1, maxLength : 256)
+                                            claim : String !@string(minLength : 1, maxLength : 256)
+                                                        effectiveDate : Date
+                                                                            statement : String @string(minLength : 1, maxLength : 16384)
+                                                                                            object : String @string(minLength : 1, maxLength : 1024)
+                                                                                                         source : ClaimSource
+                                                                                                                      rating : NormalizedRating
+                                                                                                                                   amt : Measure
+                                                                                                                                             confidence : Float
+                                                                                                                                                              sharing : Sharing
+}
+
+enum SubjectType
+{
+    PERSON
+        ORGANIZATION
+            PRODUCT
+                EVENT
+                    PLACE
+                        ENTITY
+                            ACTION
+                                DOCUMENT
+                                    CLAIM
+                                        IDEA
+                                            THING
+                                                OTHER
+}
+
+type Measure
+{
+value:
+    Float !unit : String @string(minLength : 1, maxLength : 16)
+                      howMeasured : String @string(minLength : 1, maxLength : 1024)
+}
+
+type ClaimSource
+{
+howKnown:
+    HowKnown !dateObserved : Date
+                                 sourceID : String @string(minLength : 1, maxLength : 1024)
+                                                digestMultibase : String @string(minLength : 1, maxLength : 256)
+                                                                      author : String @string(minLength : 1, maxLength : 1024)
+                                                                                   curator : String @string(minLength : 1, maxLength : 1024)
+}
+
+enum HowKnown
+{
+    FIRST_HAND
+        SECOND_HAND
+            WEB_DOCUMENT
+                VERIFIED_LOGIN
+                    BLOCKCHAIN
+                        SIGNED_DOCUMENT
+                            PHYSICAL_DOCUMENT
+                                INTEGRATION
+                                    RESEARCH
+                                        OPINION
+                                            OTHER
+}
+
+type NormalizedRating
+{
+aspect:
+    String @string(minLength : 1, maxLength : 256)
+        score : Float !@ float(min
+                               : -1, max : 1)
+                    stars : Int @ int(min : 0, max : 5)
+}
+
+type Sharing
+{
+intendedAudience:
+    String @string(minLength : 1, maxLength : 256)
+        respondAt : String !@string(minLength : 1, maxLength : 1024)
+}
+
+file3 : trustclaims.json:
+{
+    "version" : "1.0", "models" : {"kjzl6hvfrbw6caqzq7d4hvvr7uvg3avkfg1x1wwxf443trsnov3izx3znbp3jq6" : [ {"jws" : {"payload" : "AXESIENWJ-jiWxEZ9vkZyBKalMmbKZj7UVAVayzpMjDpwsKp", "signatures" : [ {"signature" : "MSspuZGIhk1ulOr676_uaNYe6CA5y4MmXkoioN56mc8sKwTXy2HXNOZRn2SRb65E5bHkiEaT8ipQOoLEE63qBA", "protected" : "eyJhbGciOiJFZERTQSIsImtpZCI6ImRpZDprZXk6ejZNa2gyd0tmUzlWRFF0c3lIUm0xRHZxVG9aNnpUdWc2RW92MWNIQXFHZUF3Q2hBI3o2TWtoMndLZlM5VkRRdHN5SFJtMUR2cVRvWjZ6VHVnNkVvdjFjSEFxR2VBd0NoQSJ9"} ], "link" : "bafyreicdkyt6rys3cem7n6izzajjvfgjtmuzr62rkakwwlhjgiyotqwcve"}, "linkedBlock" : "omRkYXRhpmRuYW1la0xpbmtlZENsYWltZXZpZXdzoGZzY2hlbWGmZHR5cGVmb2JqZWN0ZSRkZWZzp2dNZWFzdXJlpWR0eXBlZm9iamVjdGV0aXRsZWdNZWFzdXJlaHJlcXVpcmVkgWV2YWx1ZWpwcm9wZXJ0aWVzo2R1bml0o2R0eXBlZnN0cmluZ2ltYXhMZW5ndGgQaW1pbkxlbmd0aAFldmFsdWWhZHR5cGVmbnVtYmVya2hvd01lYXN1cmVko2R0eXBlZnN0cmluZ2ltYXhMZW5ndGgZBABpbWluTGVuZ3RoAXRhZGRpdGlvbmFsUHJvcGVydGllc/RnU2hhcmluZ6VkdHlwZWZvYmplY3RldGl0bGVnU2hhcmluZ2hyZXF1aXJlZIFpcmVzcG9uZEF0anByb3BlcnRpZXOiaXJlc3BvbmRBdKNkdHlwZWZzdHJpbmdpbWF4TGVuZ3RoGQQAaW1pbkxlbmd0aAFwaW50ZW5kZWRBdWRpZW5jZaNkdHlwZWZzdHJpbmdpbWF4TGVuZ3RoGQEAaW1pbkxlbmd0aAF0YWRkaXRpb25hbFByb3BlcnRpZXP0aEhvd0tub3duo2RlbnVti2pGSVJTVF9IQU5Ea1NFQ09ORF9IQU5EbFdFQl9ET0NVTUVOVG5WRVJJRklFRF9MT0dJTmpCTE9DS0NIQUlOb1NJR05FRF9ET0NVTUVOVHFQSFlTSUNBTF9ET0NVTUVOVGtJTlRFR1JBVElPTmhSRVNFQVJDSGdPUElOSU9OZU9USEVSZHR5cGVmc3RyaW5nZXRpdGxlaEhvd0tub3dua0NsYWltU291cmNlpWR0eXBlZm9iamVjdGV0aXRsZWtDbGFpbVNvdXJjZWhyZXF1aXJlZIFoaG93S25vd25qcHJvcGVydGllc6ZmYXV0aG9yo2R0eXBlZnN0cmluZ2ltYXhMZW5ndGgZBABpbWluTGVuZ3RoAWdjdXJhdG9yo2R0eXBlZnN0cmluZ2ltYXhMZW5ndGgZBABpbWluTGVuZ3RoAWhob3dLbm93bqFkJHJlZnAjLyRkZWZzL0hvd0tub3duaHNvdXJjZUlEo2R0eXBlZnN0cmluZ2ltYXhMZW5ndGgZBABpbWluTGVuZ3RoAWxkYXRlT2JzZXJ2ZWShZCRyZWZzIy8kZGVmcy9HcmFwaFFMRGF0ZW9kaWdlc3RNdWx0aWJhc2WjZHR5cGVmc3RyaW5naW1heExlbmd0aBkBAGltaW5MZW5ndGgBdGFkZGl0aW9uYWxQcm9wZXJ0aWVz9GtHcmFwaFFMRGF0ZaRkdHlwZWZzdHJpbmdldGl0bGVrR3JhcGhRTERhdGVmZm9ybWF0ZGRhdGVpbWF4TGVuZ3RoGGRrU3ViamVjdFR5cGWjZGVudW2MZlBFUlNPTmxPUkdBTklaQVRJT05nUFJPRFVDVGVFVkVOVGVQTEFDRWZFTlRJVFlmQUNUSU9OaERPQ1VNRU5UZUNMQUlNZElERUFlVEhJTkdlT1RIRVJkdHlwZWZzdHJpbmdldGl0bGVrU3ViamVjdFR5cGVwTm9ybWFsaXplZFJhdGluZ6VkdHlwZWZvYmplY3RldGl0bGVwTm9ybWFsaXplZFJhdGluZ2hyZXF1aXJlZIFlc2NvcmVqcHJvcGVydGllc6Nlc2NvcmWjZHR5cGVmbnVtYmVyZ21heGltdW0BZ21pbmltdW0gZXN0YXJzo2R0eXBlZ2ludGVnZXJnbWF4aW11bQVnbWluaW11bQBmYXNwZWN0o2R0eXBlZnN0cmluZ2ltYXhMZW5ndGgZAQBpbWluTGVuZ3RoAXRhZGRpdGlvbmFsUHJvcGVydGllc/RnJHNjaGVtYXgsaHR0cHM6Ly9qc29uLXNjaGVtYS5vcmcvZHJhZnQvMjAyMC0xMi9zY2hlbWFocmVxdWlyZWSCaXN1YmplY3RJRGVjbGFpbWpwcm9wZXJ0aWVzrGNhbXShZCRyZWZvIy8kZGVmcy9NZWFzdXJlZWNsYWlto2R0eXBlZnN0cmluZ2ltYXhMZW5ndGgZAQBpbWluTGVuZ3RoAWZvYmplY3SjZHR5cGVmc3RyaW5naW1heExlbmd0aBkEAGltaW5MZW5ndGgBZnJhdGluZ6FkJHJlZngYIy8kZGVmcy9Ob3JtYWxpemVkUmF0aW5nZnNvdXJjZaFkJHJlZnMjLyRkZWZzL0NsYWltU291cmNlZ3NoYXJpbmehZCRyZWZvIy8kZGVmcy9TaGFyaW5naXN0YXRlbWVudKNkdHlwZWZzdHJpbmdpbWF4TGVuZ3RoGUAAaW1pbkxlbmd0aAFpc3ViamVjdElEo2R0eXBlZnN0cmluZ2ltYXhMZW5ndGgZBABpbWluTGVuZ3RoAWpjb25maWRlbmNloWR0eXBlZm51bWJlcmtzdWJqZWN0TmFtZaNkdHlwZWZzdHJpbmdpbWF4TGVuZ3RoGQEAaW1pbkxlbmd0aAFrc3ViamVjdFR5cGWhZCRyZWZzIy8kZGVmcy9TdWJqZWN0VHlwZW1lZmZlY3RpdmVEYXRloWQkcmVmcyMvJGRlZnMvR3JhcGhRTERhdGV0YWRkaXRpb25hbFByb3BlcnRpZXP0aXJlbGF0aW9uc6BrZGVzY3JpcHRpb254NUNsYWltIG9yIGF0dGVzdGF0aW9uLCBwb3NzaWJseSBmcm9tIDNyZCBwYXJ0eSBzb3VyY2Vzb2FjY291bnRSZWxhdGlvbqFkdHlwZWRsaXN0ZmhlYWRlcqJlbW9kZWxSzgEEAXFxCwAJaG1vZGVsLXYxa2NvbnRyb2xsZXJzgXg4ZGlkOmtleTp6Nk1raDJ3S2ZTOVZEUXRzeUhSbTFEdnFUb1o2elR1ZzZFb3YxY0hBcUdlQXdDaEE="} ]}, "aliases" : {}, "views":
+    {
+        "account" : {}, "root" : {}, "models": {}
+    }
+}
+
+another folder named src which contains a file named trustclaims.js:
+// This is an auto-generated file, do not edit manually
+export const definition = {"models":{"LinkedClaim":{"id":"kjzl6hvfrbw6caqzq7d4hvvr7uvg3avkfg1x1wwxf443trsnov3izx3znbp3jq6","accountRelation":{"type":"list"}}},"objects":{"LinkedClaimMeasure":{"unit":{"type":"string","required":false},"value":{"type":"float","required":true},"howMeasured":{"type":"string","required":false}},"LinkedClaimNormalizedRating":{"score":{"type":"float","required":true},"stars":{"type":"integer","required":false},"aspect":{"type":"string","required":false}},"LinkedClaimClaimSource":{"author":{"type":"string","required":false},"curator":{"type":"string","required":false},"howKnown":{"type":"reference","refType":"enum","refName":"LinkedClaimHowKnown","required":false},"sourceID":{"type":"string","required":false},"dateObserved":{"type":"date","required":false},"digestMultibase":{"type":"string","required":false}},"LinkedClaimSharing":{"respondAt":{"type":"string","required":true},"intendedAudience":{"type":"string","required":false}},"LinkedClaim":{"amt":{"type":"reference","refType":"object","refName":"LinkedClaimMeasure","required":false},"claim":{"type":"string","required":true},"object":{"type":"string","required":false},"rating":{"type":"reference","refType":"object","refName":"LinkedClaimNormalizedRating","required":false},"source":{"type":"reference","refType":"object","refName":"LinkedClaimClaimSource","required":false},"sharing":{"type":"reference","refType":"object","refName":"LinkedClaimSharing","required":false},"statement":{"type":"string","required":false},"subjectID":{"type":"string","required":true},"confidence":{"type":"float","required":false},"subjectName":{"type":"string","required":false},"subjectType":{"type":"reference","refType":"enum","refName":"LinkedClaimSubjectType","required":false},"effectiveDate":{"type":"date","required":false}}},"enums":{"LinkedClaimHowKnown":["FIRST_HAND","SECOND_HAND","WEB_DOCUMENT","VERIFIED_LOGIN","BLOCKCHAIN","SIGNED_DOCUMENT","PHYSICAL_DOCUMENT","INTEGRATION","RESEARCH","OPINION","OTHER"],"LinkedClaimSubjectType":["PERSON","ORGANIZATION","PRODUCT","EVENT","PLACE","ENTITY","ACTION","DOCUMENT","CLAIM","IDEA","THING","OTHER"]},"accountData":{"linkedClaimList":{"type":"connection","name":"LinkedClaim"}}}
+
+LinkedClaim repo is here:
+
+LinkedClaims
+Vocabulary and examples for expressing assertions about addressable things.
+
+The LinkedClaim vocabulary enables linking to third party sources (possibly unsigned) or to other claims, using the digestMultibase field to verify that the linked object has not changed.
+LinkedClaim Context file:
+{
+  "@context": {
+
+    "id": "@id",
+    "type": "@type",
+
+    "xsd": "https://www.w3.org/2001/XMLSchema#",
+    
+   "LinkedClaim": {
+      "@id": "http://cooperation.org/credentials#LinkedClaim",
+
+      "@context": {
+        "lc": "http://cooperation.org/credentials",
+
+        "id": "@id", 
+
+        "digestMultibase": {
+          "@id": "http://cooperation.org/credentials#digestMultibase"
+        },
+        "claim": {
+           "@id": "lc:claim"
+        },
+        "aspect": {
+          "@id": "lc:aspect"
+        },
+        "statement": {
+          "@id": "lc:statement"
+        },
+        "object": {
+          "@id": "lc:object"
+        },
+        "source": {
+          "@id": "lc:source",
+          "@type": "lc:ClaimSource"
+        },
+        "confidence": {
+          "@id": "lc:confidence"
+        },
+        "effectiveDate": {
+          "@id": "lc:effectiveDate",
+          "@type": "xsd:dateTime"
+        },
+        "intendedAudience": {
+          "@id": "lc:intendedAudience"
+        },
+        "respondAt": {
+          "@id": "http://cooperation.org/credentials/v1#respondAt",
+          "@type": "@id"
+        }
+      }
+    },
+
+    "ClaimSource": {
+       "@id": "http://cooperation.org/credentials#ClaimSource",
+       "@context": {
+           "digestMultibase": { "@id": "lc:sourceDigest"},
+           "sourceType": { "@id": "lc:sourceType"},
+           "howKnown": { "@id": "lc:howKnown"},
+           "dateObserved": {
+             "@id": "lc:dateObserved",
+             "@type": "xsd:dateTime"
+           },
+           "author": { "@id": "lc:author", "@type": "@id"},
+           "curator": { "@id": "lc:curator", "@type": "@id"},
+           "retrieveFrom": { "@id": "lc:retrieveFrom", "@type": "@id"}
+       }
+    }
+  }
+}
+
+
+demo-app is a small reference application in python for signing claims using didkit
+demo app folder has many files:
+readme of demo app is : This is a Flask app and a CLI for issuing trust claims
+Installation
+create python virtual environment if not already set up
+python3 -m venv venv
+. venv/bin/activate
+pip3 install -r requirements.txt
+Running
+flask run
+Note that the demo app will create its own DID and private key for signing, and will save a local jwk file with the key.
+To change the signing behavior please examine the functions make_vc and sign_with_did
+The interface at localhost:5000 will create a simple LinkedClaim credential from a web form and generate the signed claim.
+Signing a Credential with CLI
+To sign a credential, run
+python3 sign_claim.py /path/to/unsigned_claim.json
+The "issuer" field in the unsigned claim will be replaced by the demo DID.
+Local context files will be replaced by the contents of the corresponding file in the local directory. This is necessary because didkit does not resolve remote contexts, and has only selected contexts preloaded.
+more files in demo app:
+app.py code:
+from flask import Flask
+from pprint import (pprint, pformat)
+from flask import request
+import json
+import pickle
+import re
+import subprocess
+import asyncio
+from copy import deepcopy
+from keymgr import sign_with_did
+import json
+import pickle
+from datetime import datetime
+from pipes_lib import ( INPUT_DIR, OUTPUT_DIR, linked_claim_context, template, remove_non_ascii )
+
+app = Flask(__name__)
+
+@app.route("/")
+def simple_inputs():
+    return """<html><title>Linked Claim inputs</title>
+              <body>
+             <a href="/">Record a claim</a> | Find claim:<form action="/filter" method="get"><input name="search"/></form>
+             <H2>Record your observations</h2>
+              <form name='get_data' action='/create' method=POST>
+<p>
+              Who or what did you observe something about? (MUST BE URI) 
+             <input name="to" size=100/>
+</p><p>
+              How did you observe it?
+              <select name="source_type"/>
+              <option name="firsthand"/>First-hand</option>
+              <option name="secondhand"/>Second-hand (someone told you)</option>
+              <option name="research"/>I read it somewhere</option>
+              </select>
+</p><p>
+              What was the source (if not yourself):
+              <input name="source" size="100"/>
+</p><p>
+              What aspect of the subject does this relate to?
+              <select name="aspect"/>
+              <option name="rating:quality"/>Quality
+              <option name="impact"/>Impact
+              <option name="risk"/>Risk 
+              </select>
+
+</p><p>
+              Ok, in your own words, what is your observation?
+              <textarea name="statement"></textarea>
+</p><p>
+             Until we have metamask login working...
+
+              Who are you? <input name="you" size=50/>
+             <input type="submit"/>
+         </form></body></html>"""
+
+
+LOCAL_DIR = '/Users/gv/rwot11-the-hague/draft-documents/vc-le/compose-py'
+
+
+async def make_vc(claim, name, effdate):
+    vc = deepcopy(template)
+    vc['effectiveDate'] = effdate or datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ") 
+    vc['credentialSubject']['id'] = claim['to']
+    vc['credentialSubject']['linkedClaim']['source'] = [claim['source'], claim['from']]
+    #vc['issuer']['name'] = meta['name']
+    vc['credentialSubject']['linkedClaim']['statement'] = remove_non_ascii(claim['statement'])
+    vc['credentialSubject']['linkedClaim']['aspect'] = claim['aspect']
+    vc['credentialSubject']['linkedClaim']['source_type'] = claim['source_type']
+
+    return await sign_with_did(vc, name)
+
+def save_vc(vc, fname):
+    with open(OUTPUT_DIR + '/' + fname + '.json', 'wt') as f:
+        pprint(json.loads(vc), stream=f)
+    with open(OUTPUT_DIR + '/' + fname + '.pickle', 'wb') as f:
+        pickle.dump(vc, f)
+
+@app.route("/create", methods=["POST"])
+async def create_claim():
+    data = { 'to': request.form['to'],
+             'from': request.form['you'],
+             'source_type': request.form['source_type'],
+             'source': request.form['source'],
+             'aspect': request.form['aspect'],
+             'statement': request.form['statement']}
+
+    effdate = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+    name = effdate
+
+    vc = await make_vc(data, name, effdate)
+
+    save_vc(vc, name)
+    return str(vc) 
+
+
+@app.route("/filter")
+def filter_claims():
+    term = request.values['search']
+    output = subprocess.check_output("grep -l " + term + " ./data/claims/*.json", shell=True)
+    res_list = output.split(b'\n')
+    res = ''
+    for fname in res_list:
+        print("On : " + str(fname))
+        try:
+            fname = fname.decode('utf-8')
+            fname = re.sub(r'json', 'pickle', fname)
+            with open(LOCAL_DIR + '/' + str(fname), 'rb') as f:
+               data = pickle.load(f)
+               res +=  '<p>' + str(data) + '</p>'
+        except:
+           pass
+    return res
+    #res = `grep ${term} ./data/claims`
+              
+     
+impact-mock-context.json:
+{
+   "Impact": {
+      "@id": "http://cooperation.org/credentials/impact#Impact",
+      "@context": {
+         "impactClaim" : {
+             "@id": "http://cooperation.org/credentials/impact#impactClaim",
+             "@type": "http://cooperation.org/credentials/impact#ImpactClaim"
+         }
+      }
+   },
+ 
+    "ImpactClaim": {
+       "@id": "http://cooperation.org/credentials/impact#ImpactClaim",
+       "@context": {
+         "price": {
+             "@id": "http://cooperation.org/credentials/impact#price"
+         },
+         "priceCurrency": {
+             "@id": "http://cooperation.org/credentials/impact#priceCurrency"
+         },
+         "impactType": {
+             "@id": "http://cooperation.org/credentials/impact#impactType"
+         },
+         "recipient": {
+             "@id": "http://cooperation.org/credentials/impact#recipient"
+         }
+       }
+    }
+}             
+
+keymgr.py:
+import asyncio
+import didkit
+import pickle
+import json
+from pprint import pprint
+from warnings import warn
+
+def create_key(name):
+    jwk = didkit.generate_ed25519_key()
+    with open(name + '.jwk', 'wb') as f:
+        pickle.dump(jwk, f)
+    return jwk
+
+
+async def sign_with_did(vc_json, name):
+    try:
+        with open(name + '.jwk', 'rb') as f:
+            jwk = pickle.load(f)
+    except:
+         jwk = create_key(name)
+
+    did = didkit.key_to_did("key", jwk)
+
+    vc_json['issuer'] = did
+
+    # TODO look up what other fields need did from credential type
+
+    try:
+        signed_cred = await didkit.issue_credential(
+            json.dumps(vc_json),
+            json.dumps({}),
+            jwk)
+        return signed_cred
+    except Exception as e:
+        warn(str(e))
+        print("Tried to sign credential: ")
+        pprint(vc_json)
+
+        return "ERROR: " + str(e)
+
+
+def link_creds(signed_cred1, signed_cred2, output_type):
+    pass
+    # TODO here
+
+
+linked-claim-context.json:
+{
+   "LinkedClaim": {
+      "@id": "http://cooperation.org/credentials#LinkedClaim",
+
+      "@context": {
+        "lc": "http://cooperation.org/credentials",
+
+        "id": "@id", 
+
+        "digestMultibase": {
+          "@id": "http://cooperation.org/credentials#digestMultibase"
+        },
+        "claim": {
+           "@id": "lc:claim"
+        },
+        "aspect": {
+          "@id": "lc:aspect"
+        },
+        "statement": {
+          "@id": "lc:statement"
+        },
+        "object": {
+          "@id": "lc:object"
+        },
+        "source": {
+          "@id": "lc:source",
+          "@type": "lc:ClaimSource"
+        },
+        "confidence": {
+          "@id": "lc:confidence"
+        },
+        "effectiveDate": {
+          "@id": "lc:effectiveDate",
+          "@type": "xsd:dateTime"
+        },
+        "intendedAudience": {
+          "@id": "lc:intendedAudience"
+        },
+        "respondAt": {
+          "@id": "http://cooperation.org/credentials/v1#respondAt",
+          "@type": "@id"
+        }
+      }
+    },
+
+    "ClaimSource": {
+       "@id": "http://cooperation.org/credentials#ClaimSource",
+       "@context": {
+           "digestMultibase": { "@id": "lc:sourceDigest"},
+           "sourceType": { "@id": "lc:sourceType"},
+           "howKnown": { "@id": "lc:howKnown"},
+           "dateObserved": {
+             "@id": "lc:dateObserved",
+             "@type": "xsd:dateTime"
+           },
+           "author": { "@id": "lc:author", "@type": "@id"},
+           "curator": { "@id": "lc:curator", "@type": "@id"},
+           "retrieveFrom": { "@id": "lc:retrieveFrom", "@type": "@id"}
+       }
+    }
+}
+
+pipes_lib.py:
+import asyncio
+from copy import deepcopy
+from keymgr import sign_with_did
+import json
+import pickle
+from pprint import pprint
+
+INPUT_DIR = './data/raw'
+OUTPUT_DIR = './data/claims'
+
+linked_claim_context = {
+           "effectiveDate": {
+              "@id": "lc:effectiveDate",
+              "@type": "xsd:dateTime"
+            },
+            "CanContainLinkedClaim": {
+                "@id":"http://cooperation.org/credentials/LinkedClaimCapability/v1",
+                "@context": {
+                    "linkedClaim": {"@id":"http://cooperation.org/credentials/LinkedClaimCapability/v1#linkedClaim"}
+                }
+            },
+           "LinkedClaim": {
+             "@id": "http://cooperation.org/credentials/LinkedClaim/v1",
+             "@context": {
+                "lc":"http://cooperation.org/credentials/LinkedClaim/v1",
+                "aspect": {"@id": "lc:aspect"},
+                "statement": {"@id": "lc:statement"},
+                "source_type":{"@id": "lc:source_type"},
+                "source": {"@id": "lc:source"},
+             }
+          }
+    }
+
+
+sources = [
+ { 'file': 'tec.json',
+   'type': 'tec',
+   'effdate': "2022-09-28T00:00:00Z",
+   'name': 'olivers_spider'
+ },
+]
+
+template = {
+        "@context": [
+                "https://www.w3.org/2018/credentials/v1",
+                linked_claim_context
+              ],
+              "type": [ "VerifiableCredential", "LinkedClaim" ],
+              "issuer": None,
+              "issuanceDate": "2022-09-29T00:00:00Z",  # TODO replce w today
+              "expirationDate": "2023-09-29T00:00:00Z", # TODO replace w next year
+              "effectiveDate": '',
+              "credentialSubject": {
+                'type': 'CanContainLinkedClaim',
+                "id": '',
+
+                "linkedClaim": {
+                  "type": "LinkedClaim",
+                  "aspect": "impact:community",
+                  "statement": "",
+                  "source_type": "discord scrape",
+                  "source": []
+                }
+       }
+}
+
+def remove_non_ascii(string):
+    return ''.join(char for char in string if ord(char) < 128)
+
+async def make_vc(claim, meta):
+    vc = deepcopy(template) 
+    vc['effectiveDate'] = meta['effdate'] 
+    vc['credentialSubject']['id'] = 'discord:' + claim['to']
+    vc['credentialSubject']['linkedClaim']['source'].append(claim['from'])
+    #vc['issuer']['name'] = meta['name']
+    vc['credentialSubject']['linkedClaim']['statement'] = remove_non_ascii(claim['text'])
+ 
+    return await sign_with_did(vc, meta['name'])
+
+    #print(json.dumps(vc))
+   
+async def run_pipe():
+    claim_num = 0
+    for source in sources:
+        with open(INPUT_DIR + '/'+source['file'], 'r') as f:
+            data = json.load(f)
+        for raw_claim in data['attestations']:
+            vc = await make_vc(raw_claim, source)
+            fname = source['name'] + '_' + str(claim_num)
+            with open(OUTPUT_DIR + '/' + fname + '.json', 'wt') as f:
+                pprint(json.loads(vc), stream=f)
+            with open(OUTPUT_DIR + '/' + fname + '.pickle', 'wb') as f:
+                pickle.dump(vc, f)
+            claim_num += 1
+
+
+
+requirements.txt:
+asgiref==3.5.2
+async==0.6.2
+click==8.1.3
+didkit==0.3.1
+Flask==2.2.2
+greenlet==1.1.3
+greenletio==0.9.0
+h11==0.14.0
+importlib-metadata==4.12.0
+itsdangerous==2.1.2
+Jinja2==3.1.2
+MarkupSafe==2.1.1
+md5hash==0.0.6
+typing-extensions==4.3.0
+uvicorn==0.18.3
+Werkzeug==2.2.2
+zipp==3.8.1
+
+risk-mock-context.json:
+{
+   "Risk": {
+      "@id": "http://cooperation.org/credentials/risk#Risk",
+      "@context": {
+         "incidentClaim" : {
+             "@id": "http://cooperation.org/credentials/risk#incidentClaim",
+             "@type": "http://cooperation.org/credentials/risk#IncidentClaim"
+         }
+      }
+   },
+ 
+    "IncidentClaim": {
+       "@id": "http://cooperation.org/credentials/risk#IncidentClaim",
+       "@context": {
+         "incidentType": {
+             "@id": "http://cooperation.org/credentials/risk#incidentType"
+         },
+         "incidentDate": {
+             "@id": "http://cooperation.org/credentials/risk#incidentDate"
+         },
+         "narrative": {
+             "@id": "http://cooperation.org/credentials/risk#narrative"
+         }
+       }
+    }
+}
+
+schema-mock-context.json:
+{
+   "Review": {
+      "@id": "https://schema.org#Review",
+      "@context": {
+         "reviewRating" : {
+             "@id": "https://schema.org#reviewRating",
+             "@type": "https://schema.org#ReviewRating"
+         }
+      }
+   },
+ 
+   "ReviewRating": {
+      "@id": "https://schema.org#ReviewRating",
+
+      "@context": {
+        "schema": "https://schema.org",
+
+        "ratingValue": {
+           "@id": "schema:ratingValue"
+        },
+        "bestRating": {
+          "@id": "schema:bestRating"
+        },
+        "worstRating": {
+          "@id": "schema:worstRating"
+        },
+        "ratingAspect": {
+          "@id": "schema:ratingAspect"
+        }
+      }
+    },
+
+    "DonateAction": {
+       "@id": "https://schema.org#DonateAction",
+       "@context": {
+         "schema": "https://schema.org",
+         "price": {
+             "@id": "schema:price"
+         },
+         "priceCurrency": {
+             "@id": "schema:priceCurrency"
+         },
+         "recipient": {
+             "@id": "schema:recipient"
+         }
+       }
+    }
+}
+
+sign_claim.py:
+from pprint import (pprint, pformat)
+import json
+import pickle
+import sys
+import re
+import subprocess
+import asyncio
+from copy import deepcopy
+from keymgr import sign_with_did
+import json
+import pickle
+from datetime import datetime
+from pipes_lib import ( INPUT_DIR, OUTPUT_DIR, linked_claim_context, template, remove_non_ascii )
+
+claim_file = sys.argv[1]
+
+with open(claim_file, 'r') as f:
+    vc = json.load(f)
+
+def resolve_local_contexts(vc):
+    context = []
+    for src in vc['@context']:
+        # didkit has w3 contexts preloaded
+        if (type(src) == dict or re.search('w3.org', src)):
+            context.append(src)
+        else:
+            # lets see if we have it locally
+            with open(src, 'r') as cf:
+               lc = json.load(cf)
+            context.append(lc)
+    vc['@context'] = context 
+
+def signit(vc, name='local_did'):
+    return asyncio.run(sign_with_did(vc, 'local_did'))
+
+resolve_local_contexts(vc)
+signed = signit(vc)
+
+print(signed)              
+
+
+v3p0-context.json:
+{
+    "OpenBadgeCredential": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#OpenBadgeCredential"
+    },
+    "Achievement": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Achievement",
+      "@context": {
+        "achievementType": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#achievementType",
+          "@type": "xsd:string"
+        },
+        "alignment": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#alignment",
+          "@type": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Alignment",
+          "@container": "@set"
+        },
+        "creator": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Profile"
+        },
+        "creditsAvailable": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#creditsAvailable",
+          "@type": "xsd:float"
+        },
+        "criteria": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Criteria",
+          "@type": "@id"
+        },
+        "fieldOfStudy": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#fieldOfStudy",
+          "@type": "xsd:string"
+        },
+        "humanCode": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#humanCode",
+          "@type": "xsd:string"
+        },
+        "otherIdentifier": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#otherIdentifier",
+          "@type": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#IdentifierEntry",
+          "@container": "@set"
+        },
+        "related": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#related",
+          "@type": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Related",
+          "@container": "@set"
+        },
+        "resultDescription": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#resultDescription",
+          "@type": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#ResultDescription",
+          "@container": "@set"
+        },
+        "specialization": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#specialization",
+          "@type": "xsd:string"
+        },
+        "tag": {
+          "@id": "https://schema.org/keywords",
+          "@type": "xsd:string",
+          "@container": "@set"
+        },
+        "version": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#version",
+          "@type": "xsd:string"
+        }
+      }
+    },
+    "AchievementCredential": {
+      "@id": "OpenBadgeCredential"
+    },
+    "AchievementSubject": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#AchievementSubject",
+      "@context": {
+        "achievement": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Achievement"
+        },
+        "activityEndDate": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#activityEndDate",
+          "@type": "xsd:date"
+        },
+        "activityStartDate": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#activityStartDate",
+          "@type": "xsd:date"
+        },
+        "creditsEarned": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#creditsEarned",
+          "@type": "xsd:float"
+        },
+        "identifier": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#identifier",
+          "@type": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#IdentityObject",
+          "@container": "@set"
+        },
+        "licenseNumber": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#licenseNumber",
+          "@type": "xsd:string"
+        },
+        "result": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#result",
+          "@type": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Result",
+          "@container": "@set"
+        },
+        "role": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#role",
+          "@type": "xsd:string"
+        },
+        "source": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#source",
+          "@type": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Profile"
+        },
+        "term": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#term",
+          "@type": "xsd:string"
+        }
+      }
+    },
+    "Address": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Address",
+      "@context": {
+        "addressCountry": {
+          "@id": "https://schema.org/addressCountry",
+          "@type": "xsd:string"
+        },
+        "addressCountryCode": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#CountryCode",
+          "@type": "xsd:string"
+        },
+        "addressLocality": {
+          "@id": "https://schema.org/addressLocality",
+          "@type": "xsd:string"
+        },
+        "addressRegion": {
+          "@id": "https://schema.org/addressRegion",
+          "@type": "xsd:string"
+        },
+        "geo": {
+          "@id" : "https://purl.imsglobal.org/spec/vc/ob/vocab.html#GeoCoordinates"
+        },
+        "postOfficeBoxNumber": {
+          "@id": "https://schema.org/postOfficeBoxNumber",
+          "@type": "xsd:string"
+        },
+        "postalCode": {
+          "@id": "https://schema.org/postalCode",
+          "@type": "xsd:string"
+        },
+        "streetAddress": {
+          "@id": "https://schema.org/streetAddress",
+          "@type": "xsd:string"
+        }
+      }
+    },
+    "Alignment": {
+      "@id": "https://schema.org/Alignment",
+      "@context": {
+        "targetCode": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#targetCode",
+          "@type": "xsd:string"
+        },
+        "targetDescription": {
+          "@id": "https://schema.org/targetDescription",
+          "@type": "xsd:string"
+        },
+        "targetFramework": {
+          "@id": "https://schema.org/targetFramework",
+          "@type": "xsd:string"
+        },
+        "targetName": {
+          "@id": "https://schema.org/targetName",
+          "@type": "xsd:string"
+        },
+        "targetType": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#targetType",
+          "@type": "xsd:string"
+        },
+        "targetUrl": {
+          "@id": "https://schema.org/targetUrl",
+          "@type": "xsd:anyURI"
+        }
+      }
+    },
+    "Criteria": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Criteria"
+    },
+    "RecommendationCredential": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#RecommendationCredential"
+    },
+    "RecommendationSubject": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#RecommendationSubject",
+      "@context": {
+         "recommendation": {
+             "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#recommendation",
+             "@type": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Recommendation"
+         },
+        "recommendationComment": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#endorsementComment",
+          "@type": "xsd:string"
+        }
+      }
+    },
+    "Recommendation": {
+       "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Recommendation",
+       "@context": {
+         "recommender": {
+           "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#recommender",
+           "@type": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Recommender"
+         },
+         "statement": {
+           "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#recommendationStatement"
+         }
+       }
+    },   
+    "Recommender": {
+       "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Recommender",
+       "@context": {
+          "relevance": {
+             "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#relevance"
+          }
+       }
+    },
+ 
+    "Evidence": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Evidence",
+      "@context": {
+        "audience": {
+          "@id": "https://schema.org/audience",
+          "@type": "xsd:string"
+        },
+        "genre": {
+          "@id": "https://schema.org/genre",
+          "@type": "xsd:string"
+        }
+      }
+    },
+    "GeoCoordinates": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#GeoCoordinates",
+      "@context": {
+        "latitude": {
+          "@id": "https://schema.org/latitude",
+          "@type": "xsd:string"
+        },
+        "longitude": {
+          "@id": "https://schema.org/longitude",
+          "@type": "xsd:string"
+        }
+      }
+    },
+    "IdentifierEntry": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#IdentifierEntry",
+      "@context": {
+        "identifier": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#identifier",
+          "@type": "xsd:string"
+        },
+        "identifierType": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#identifierType",
+          "@type": "xsd:string"
+        }
+      }
+    },
+    "IdentityObject": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#IdentityObject",
+      "@context": {
+        "hashed": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#hashed",
+          "@type": "xsd:boolean"
+        },
+        "identityHash": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#identityHash",
+          "@type": "xsd:string"
+        },
+        "identityType": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#identityType",
+          "@type": "xsd:string"
+        },
+        "salt":  {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#salt",
+          "@type": "xsd:string"
+        }
+      }
+    },
+    "Image": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Image",
+      "@context": {
+        "caption": {
+          "@id": "https://schema.org/caption",
+          "@type": "xsd:string"
+        }
+      }
+    },
+    "Profile": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Profile",
+      "@context": {
+        "additionalName": {
+          "@id": "https://schema.org/additionalName",
+          "@type": "xsd:string"
+        },
+        "address": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Address"
+        },
+        "dateOfBirth": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#dateOfBirth",
+          "@type": "xsd:date"
+        },
+        "email": {
+          "@id": "https://schema.org/email",
+          "@type": "xsd:string"
+        },
+        "familyName": {
+          "@id": "https://schema.org/familyName",
+          "@type": "xsd:string"
+        },
+        "familyNamePrefix": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#familyNamePrefix",
+          "@type": "xsd:string"
+        },
+        "givenName": {
+          "@id": "https://schema.org/givenName",
+          "@type": "xsd:string"
+        },
+        "honorificPrefix": {
+          "@id": "https://schema.org/honorificPrefix",
+          "@type": "xsd:string"
+        },
+        "honorificSuffix": {
+          "@id": "https://schema.org/honorificSuffix",
+          "@type": "xsd:string"
+        },
+        "otherIdentifier": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#otherIdentifier",
+          "@type": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#IdentifierEntry",
+          "@container": "@set"
+        },
+        "parentOrg": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#parentOrg",
+          "@type": "xsd:string"
+        },
+        "patronymicName": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#patronymicName",
+          "@type": "xsd:string"
+        },
+        "phone": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#PhoneNumber",
+          "@type": "xsd:string"
+        },
+        "official": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#official",
+          "@type": "xsd:string"
+        }
+      }
+    },
+    "Related": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Related",
+      "@context": {
+        "version": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#version",
+          "@type": "xsd:string"
+        }
+      }
+    },
+    "Result": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Result",
+      "@context": {
+        "achievedLevel": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#achievedLevel",
+          "@type": "xsd:anyURI"
+        },
+        "resultDescription": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#resultDescription",
+          "@type": "xsd:anyURI"
+        },
+        "status": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#status",
+          "@type": "xsd:string"
+        },
+        "value": {
+          "@id": "https://schema.org/value",
+          "@type": "xsd:string"
+        }
+      }
+    },
+    "ResultDescription": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#ResultDescription",
+      "@context": {
+        "allowedValue": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#allowedValue",
+          "@type": "xsd:string",
+          "@container": "@set"
+        },
+        "requiredLevel": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#requiredLevel",
+          "@type": "xsd:anyURI"
+        },
+        "requiredValue": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#requiredValue",
+          "@type": "xsd:string"
+        },
+        "resultType": {
+          "@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#resultType",
+          "@type": "xsd:string"
+        },
+        "rubricCriterionLevel": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#rubricCriterionLevel",
+          "@type": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#RubricCriterionLevel",
+          "@container": "@set"
+        },
+        "valueMax": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#valueMax",
+          "@type": "xsd:string"
+        },
+        "valueMin": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#valueMin",
+          "@type": "xsd:string"
+        }
+      }
+    },
+    "RubricCriterionLevel": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#RubricCriterionLevel",
+      "@context": {
+        "level": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#level",
+          "@type": "xsd:string"
+        },
+        "points": {
+          "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#points",
+          "@type": "xsd:string"
+        }
+      }
+    },
+    "alignment": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#alignment",
+      "@type": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Alignment",
+      "@container": "@set"
+    },
+    "description": {
+      "@id": "https://schema.org/description",
+      "@type": "xsd:string"
+    },
+    "endorsement": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#endorsement",
+      "@type": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#RecommendationCredential",
+      "@container": "@set"
+    },
+    "image": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#image",
+      "@type": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#Image"
+    },
+    "name": {
+      "@id": "https://schema.org/name",
+      "@type": "xsd:string"
+    },
+    "narrative": {
+      "@id": "https://purl.imsglobal.org/spec/vc/ob/vocab.html#narrative",
+      "@type": "xsd:string"
+    },
+    "url": {
+      "@id": "https://schema.org/url",
+      "@type": "xsd:anyURI"
+    }
+}
+
+all above files are in demo app folder
+
+examples folder contains simulated and actual real-world examples
+files in examples folder are below:
+it has 7 folders :
+1. accident: it has four files that are :
+first-hand.json:
+{"@context": ["https://www.w3.org/2018/credentials/v1",
+              "linked-claim-context.json"
+             ],
+ "type": ["VerifiableCredential", "LinkedClaim"],
+ "issuanceDate": "2022-02-02T21:36:59Z",
+  "credentialSubject": {
+    "id": "https://accidents.example.com/reports/accident-1",
+    "type": ["LinkedClaim"],
+    "claim": "eventHappened",
+    "statement": "Truck ran a red light...",
+    "effectiveDate": "2022-01-01",
+    "source": {
+       "id": "did:me123",
+       "type": "ClaimSource",
+       "sourceType": "firstHand",
+       "howKnown": "I saw the accident, I was standing on the corner about 20 feet away",
+       "dateObserved": "2022-01-01"
+    }
+  }
+}
+
+first-hand.json.signed:
+{"@context":["https://www.w3.org/2018/credentials/v1",{"LinkedClaim":{"@context":{"aspect":{"@id":"lc:aspect"},"claim":{"@id":"lc:claim"},"confidence":{"@id":"lc:confidence"},"digestMultibase":{"@id":"http://cooperation.org/credentials#digestMultibase"},"effectiveDate":{"@id":"lc:effectiveDate","@type":"xsd:dateTime"},"id":"@id","intendedAudience":{"@id":"lc:intendedAudience"},"lc":"http://cooperation.org/credentials","object":{"@id":"lc:object"},"respondAt":{"@id":"http://cooperation.org/credentials/v1#respondAt","@type":"@id"},"source":{"@id":"lc:source","@type":"lc:ClaimSource"},"statement":{"@id":"lc:statement"}},"@id":"http://cooperation.org/credentials#LinkedClaim"},"ClaimSource":{"@context":{"author":{"@id":"lc:author","@type":"@id"},"curator":{"@id":"lc:curator","@type":"@id"},"dateObserved":{"@id":"lc:dateObserved","@type":"xsd:dateTime"},"digestMultibase":{"@id":"lc:sourceDigest"},"howKnown":{"@id":"lc:howKnown"},"retrieveFrom":{"@id":"lc:retrieveFrom","@type":"@id"},"sourceType":{"@id":"lc:sourceType"}},"@id":"http://cooperation.org/credentials#ClaimSource"}}],"type":["VerifiableCredential","LinkedClaim"],"credentialSubject":{"id":"https://accidents.example.com/reports/accident-1","source":{"dateObserved":"2022-01-01","howKnown":"I saw the accident, I was standing on the corner about 20 feet away","id":"did:me123","sourceType":"firstHand","type":"ClaimSource"},"type":["LinkedClaim"],"effectiveDate":"2022-01-01","claim":"eventHappened","statement":"Truck ran a red light..."},"issuer":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","issuanceDate":"2022-02-02T21:36:59Z","proof":{"type":"Ed25519Signature2018","proofPurpose":"assertionMethod","verificationMethod":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1#z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","created":"2022-12-31T03:14:32.400Z","jws":"eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..cVHIIlgl7ZS7dck8ahyRx7P-ClvjUgumTpscAUyE0lH5KYHDmvcJ2OzH5oY6Ib77TcQ8hW8zzpWe9udkePmzCQ"}}
+
+second-hand.json:
+{"@context": ["https://www.w3.org/2018/credentials/v1",
+              "linked-claim-context.json"
+             ],
+ "type": ["VerifiableCredential", "LinkedClaim"],
+ "issuanceDate": "2022-02-02T21:36:59Z",
+  "credentialSubject": {
+    "id": "https://accidents.example.com/reports/accident-1",
+    "type": ["LinkedClaim", "Event"],
+    "claim": "eventHappened",
+    "statement": "Truck ran a red light...",
+    "effectiveDate": "2022-01-01",
+    "source": {
+       "id": "https://mas.to/charles456",
+       "type": "ClaimSource",
+       "sourceType": "secondary",
+       "howKnown": "Charles saw the accident, he told me about it on the phone a few days after it happened",
+       "dateObserved": "2022-01-05"
+    }
+  }
+}
+
+second-hand.json.signed:
+{"@context":["https://www.w3.org/2018/credentials/v1",{"ClaimSource":{"@context":{"author":{"@id":"lc:author","@type":"@id"},"curator":{"@id":"lc:curator","@type":"@id"},"dateObserved":{"@id":"lc:dateObserved","@type":"xsd:dateTime"},"digestMultibase":{"@id":"lc:sourceDigest"},"howKnown":{"@id":"lc:howKnown"},"retrieveFrom":{"@id":"lc:retrieveFrom","@type":"@id"},"sourceType":{"@id":"lc:sourceType"}},"@id":"http://cooperation.org/credentials#ClaimSource"},"LinkedClaim":{"@context":{"aspect":{"@id":"lc:aspect"},"claim":{"@id":"lc:claim"},"confidence":{"@id":"lc:confidence"},"digestMultibase":{"@id":"http://cooperation.org/credentials#digestMultibase"},"effectiveDate":{"@id":"lc:effectiveDate","@type":"xsd:dateTime"},"id":"@id","intendedAudience":{"@id":"lc:intendedAudience"},"lc":"http://cooperation.org/credentials","object":{"@id":"lc:object"},"respondAt":{"@id":"http://cooperation.org/credentials/v1#respondAt","@type":"@id"},"source":{"@id":"lc:source","@type":"lc:ClaimSource"},"statement":{"@id":"lc:statement"}},"@id":"http://cooperation.org/credentials#LinkedClaim"}}],"type":["VerifiableCredential","LinkedClaim"],"credentialSubject":{"id":"https://accidents.example.com/reports/accident-1","source":{"dateObserved":"2022-01-05","howKnown":"Charles saw the accident, he told me about it on the phone a few days after it happened","id":"https://mas.to/charles456","sourceType":"secondary","type":"ClaimSource"},"statement":"Truck ran a red light...","effectiveDate":"2022-01-01","claim":"eventHappened","type":["LinkedClaim","Event"]},"issuer":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","issuanceDate":"2022-02-02T21:36:59Z","proof":{"type":"Ed25519Signature2018","proofPurpose":"assertionMethod","verificationMethod":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1#z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","created":"2022-12-31T03:14:32.491Z","jws":"eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..lMFLUGv3nuUpvgUeePMFh49C-s46T9jMaV3xcKbLuI2gPNMQrcr-fRqVUEl9U_3pFEJx4yA3Zd-ZnQfjLfhRCA"}}
+
+2. disaster-recovery: this folder contains 5 files:
+Narrative.md = This is a straightforward narrative about how a volunteer could independently corroborate the use of funds by a Disaster Recovery agency.
+
+"Recovery Agency" publishes a claim about how many people they have helped and how many ongoing projects they have.
+
+An independent volunteer working with the funders receives a list of 20 addresses where work is ongoing, and randomly selects one to visit. She documents her visit and verifies with the foreman that funds were indeed received from Recovery Agency for the work, and photographs the repairs in progress. She uploads the photo to dropbox and using a simple interface, issues a signed credential attesting to her observations.
+agency-claim-signed.json:
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    {
+      "ClaimSource": {
+        "@context": {
+          "author": {
+            "@id": "lc:author",
+            "@type": "@id"
+          },
+          "curator": {
+            "@id": "lc:curator",
+            "@type": "@id"
+          },
+          "dateObserved": {
+            "@id": "lc:dateObserved",
+            "@type": "xsd:dateTime"
+          },
+          "digestMultibase": {
+            "@id": "lc:sourceDigest"
+          },
+          "howKnown": {
+            "@id": "lc:howKnown"
+          },
+          "retrieveFrom": {
+            "@id": "lc:retrieveFrom",
+            "@type": "@id"
+          },
+          "sourceType": {
+            "@id": "lc:sourceType"
+          }
+        },
+        "@id": "http://cooperation.org/credentials#ClaimSource"
+      },
+      "LinkedClaim": {
+        "@context": {
+          "aspect": {
+            "@id": "lc:aspect"
+          },
+          "claim": {
+            "@id": "lc:claim"
+          },
+          "confidence": {
+            "@id": "lc:confidence"
+          },
+          "digestMultibase": {
+            "@id": "http://cooperation.org/credentials#digestMultibase"
+          },
+          "effectiveDate": {
+            "@id": "lc:effectiveDate",
+            "@type": "xsd:dateTime"
+          },
+          "id": "@id",
+          "intendedAudience": {
+            "@id": "lc:intendedAudience"
+          },
+          "lc": "http://cooperation.org/credentials",
+          "object": {
+            "@id": "lc:object"
+          },
+          "respondAt": {
+            "@id": "http://cooperation.org/credentials/v1#respondAt",
+            "@type": "@id"
+          },
+          "source": {
+            "@id": "lc:source",
+            "@type": "lc:ClaimSource"
+          },
+          "statement": {
+            "@id": "lc:statement"
+          }
+        },
+        "@id": "http://cooperation.org/credentials#LinkedClaim"
+      }
+    },
+    {
+      "ReviewRating": {
+        "@context": {
+          "bestRating": {
+            "@id": "schema:bestRating"
+          },
+          "ratingAspect": {
+            "@id": "schema:ratingAspect"
+          },
+          "ratingValue": {
+            "@id": "schema:ratingValue"
+          },
+          "schema": "https://schema.org",
+          "worstRating": {
+            "@id": "schema:worstRating"
+          }
+        },
+        "@id": "https://schema.org#ReviewRating"
+      },
+      "Review": {
+        "@context": {
+          "reviewRating": {
+            "@id": "https://schema.org#reviewRating",
+            "@type": "https://schema.org#ReviewRating"
+          }
+        },
+        "@id": "https://schema.org#Review"
+      },
+      "DonateAction": {
+        "@context": {
+          "price": {
+            "@id": "schema:price"
+          },
+          "priceCurrency": {
+            "@id": "schema:priceCurrency"
+          },
+          "recipient": {
+            "@id": "schema:recipient"
+          },
+          "schema": "https://schema.org"
+        },
+        "@id": "https://schema.org#DonateAction"
+      }
+    },
+    {
+      "Impact": {
+        "@context": {
+          "impactClaim": {
+            "@id": "http://cooperation.org/credentials/impact#impactClaim",
+            "@type": "http://cooperation.org/credentials/impact#ImpactClaim"
+          }
+        },
+        "@id": "http://cooperation.org/credentials/impact#Impact"
+      },
+      "ImpactClaim": {
+        "@context": {
+          "impactType": {
+            "@id": "http://cooperation.org/credentials/impact#impactType"
+          },
+          "price": {
+            "@id": "http://cooperation.org/credentials/impact#price"
+          },
+          "priceCurrency": {
+            "@id": "http://cooperation.org/credentials/impact#priceCurrency"
+          },
+          "recipient": {
+            "@id": "http://cooperation.org/credentials/impact#recipient"
+          }
+        },
+        "@id": "http://cooperation.org/credentials/impact#ImpactClaim"
+      }
+    }
+  ],
+  "type": [
+    "VerifiableCredential"
+  ],
+  "credentialSubject": {
+    "id": "did:agency987",
+    "impactClaim": {
+      "id": "cid:09871234324",
+      "impactType": "direct",
+      "type": "ImpactClaim"
+    },
+    "type": [
+      "LinkedClaim",
+      "Impact"
+    ],
+    "effectiveDate": "2022-12-01",
+    "statement": "Recovery Agency helped 200 individuals repair their homes after Hurricane Zekko, with ongoing work on at least 50 locations as of this date.",
+    "source": {
+      "dateObserved": "2022-12-01",
+      "howKnown": "Published to web",
+      "id": "https://recoveryagency.com/2022/ReportDetail.pdf",
+      "sourceType": "document",
+      "type": "ClaimSource"
+    }
+  },
+  "issuer": "did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1",
+  "issuanceDate": "2022-12-01T00:00:00Z",
+  "proof": {
+    "type": "Ed25519Signature2018",
+    "proofPurpose": "assertionMethod",
+    "verificationMethod": "did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1#z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1",
+    "created": "2023-01-23T09:42:26.874Z",
+    "jws": "eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..RNGybbmwDJuDOWRluPd4-E-7tHZZDpJVv7aYlMksG_4n-SizUq8qBfQPPEZv4D1xIb1XvL4COk1_hDr2VHjtDA"
+  }
+}
+
+agency-claim.json:
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "linked-claim-context.json",
+    "schema-mock-context.json",
+    "impact-mock-context.json"
+  ],
+  "type": ["VerifiableCredential"],
+  "issuer": {
+    "id": "did:employee678",
+    "name": "Angel Smith"
+  },
+  "issuanceDate": "2022-12-01T00:00:00Z",
+  "credentialSubject": {
+    "id": "did:agency987",
+    "type": ["LinkedClaim", "Impact"],
+    "effectiveDate": "2022-12-01", 
+    "statement": "Recovery Agency helped 200 individuals repair their homes after Hurricane Zekko, with ongoing work on at least 50 locations as of this date.",
+    "impactClaim": {
+        "type": "ImpactClaim",
+        "id": "cid:09871234324",
+        "impactType":"direct"
+    },
+    "source": {
+         "type": "ClaimSource",
+         "id": "https://recoveryagency.com/2022/ReportDetail.pdf",
+         "sourceType": "document",
+         "howKnown": "Published to web",
+         "dateObserved": "2022-12-01"
+      }
+    }
+}
+
+volunteer-confirmation-signed.json:
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    {
+      "LinkedClaim": {
+        "@context": {
+          "aspect": {
+            "@id": "lc:aspect"
+          },
+          "claim": {
+            "@id": "lc:claim"
+          },
+          "confidence": {
+            "@id": "lc:confidence"
+          },
+          "digestMultibase": {
+            "@id": "http://cooperation.org/credentials#digestMultibase"
+          },
+          "effectiveDate": {
+            "@id": "lc:effectiveDate",
+            "@type": "xsd:dateTime"
+          },
+          "id": "@id",
+          "intendedAudience": {
+            "@id": "lc:intendedAudience"
+          },
+          "lc": "http://cooperation.org/credentials",
+          "object": {
+            "@id": "lc:object"
+          },
+          "respondAt": {
+            "@id": "http://cooperation.org/credentials/v1#respondAt",
+            "@type": "@id"
+          },
+          "source": {
+            "@id": "lc:source",
+            "@type": "lc:ClaimSource"
+          },
+          "statement": {
+            "@id": "lc:statement"
+          }
+        },
+        "@id": "http://cooperation.org/credentials#LinkedClaim"
+      },
+      "ClaimSource": {
+        "@context": {
+          "author": {
+            "@id": "lc:author",
+            "@type": "@id"
+          },
+          "curator": {
+            "@id": "lc:curator",
+            "@type": "@id"
+          },
+          "dateObserved": {
+            "@id": "lc:dateObserved",
+            "@type": "xsd:dateTime"
+          },
+          "digestMultibase": {
+            "@id": "lc:sourceDigest"
+          },
+          "howKnown": {
+            "@id": "lc:howKnown"
+          },
+          "retrieveFrom": {
+            "@id": "lc:retrieveFrom",
+            "@type": "@id"
+          },
+          "sourceType": {
+            "@id": "lc:sourceType"
+          }
+        },
+        "@id": "http://cooperation.org/credentials#ClaimSource"
+      }
+    },
+    {
+      "ImpactClaim": {
+        "@context": {
+          "impactType": {
+            "@id": "http://cooperation.org/credentials/impact#impactType"
+          },
+          "price": {
+            "@id": "http://cooperation.org/credentials/impact#price"
+          },
+          "priceCurrency": {
+            "@id": "http://cooperation.org/credentials/impact#priceCurrency"
+          },
+          "recipient": {
+            "@id": "http://cooperation.org/credentials/impact#recipient"
+          }
+        },
+        "@id": "http://cooperation.org/credentials/impact#ImpactClaim"
+      },
+      "Impact": {
+        "@context": {
+          "impactClaim": {
+            "@id": "http://cooperation.org/credentials/impact#impactClaim",
+            "@type": "http://cooperation.org/credentials/impact#ImpactClaim"
+          }
+        },
+        "@id": "http://cooperation.org/credentials/impact#Impact"
+      }
+    }
+  ],
+  "type": [
+    "VerifiableCredential"
+  ],
+  "credentialSubject": {
+    "id": "did:agency987",
+    "impactClaim": {
+      "impactType": "direct",
+      "price": "2000",
+      "priceCurrency": "USD",
+      "recipient": "did:personal345",
+      "type": "ImpactClaim"
+    },
+    "statement": "I chose a random location from 20 provided to me by Recovery Agency and witnessed repair work ongoing.  I spoke to the foreman who confirmed receipt of funds from Recovery Agency for the work.",
+    "source": [
+      {
+        "dateObserved": "2022-12-07",
+        "id": "did:personal345",
+        "sourceType": "firstHand",
+        "type": "ClaimSource"
+      },
+      {
+        "dateObserved": "2022-12-07",
+        "id": "https://www.dropbox.com/s/e03ppi5wki26k1s/puerto-rico-hurricane-maria-ap-17278092354742.jpeg?dl=0",
+        "sourceType": "photograph",
+        "type": "ClaimSource"
+      }
+    ],
+    "type": [
+      "LinkedClaim",
+      "Impact"
+    ],
+    "effectiveDate": "2022-12-07"
+  },
+  "issuer": "did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1",
+  "issuanceDate": "2022-12-15T00:00:00Z",
+  "proof": {
+    "type": "Ed25519Signature2018",
+    "proofPurpose": "assertionMethod",
+    "verificationMethod": "did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1#z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1",
+    "created": "2023-01-23T09:43:07.017Z",
+    "jws": "eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..9WhqD8avc6l4-tcaOSG2-NXHrcX6QCgPcp-iI9zvyGFVWhI3GleyubpBXsTdMlfMFbPyOlyXCtlxfX3v1mYWAQ"
+  }
+}
+
+volunteer-confirmation.json:
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "linked-claim-context.json",
+    "impact-mock-context.json"
+  ],
+  "type": ["VerifiableCredential"],
+  "issuer": {
+    "id": "did:personal345",
+    "name": "Kiyana Jacobson"
+  },
+  "issuanceDate": "2022-12-15T00:00:00Z",
+  "credentialSubject": {
+    "id": "did:agency987",
+    "type": ["LinkedClaim", "Impact"],
+    "effectiveDate": "2022-12-07",
+    "statement": "I chose a random location from 20 provided to me by Recovery Agency and witnessed repair work ongoing.  I spoke to the foreman who confirmed receipt of funds from Recovery Agency for the work.",
+    "impactClaim": {
+        "type": "ImpactClaim",
+        "impactType": "direct",
+        "price": "2000",
+        "priceCurrency": "USD",
+        "recipient": "did:personal345"
+    },
+
+    "source": [{
+         "type": "ClaimSource",
+         "id": "did:personal345",
+         "sourceType": "firstHand",
+         "dateObserved": "2022-12-07"
+      },
+      { "type": "ClaimSource",
+        "id" : "https://www.dropbox.com/s/e03ppi5wki26k1s/puerto-rico-hurricane-maria-ap-17278092354742.jpeg?dl=0",
+        "sourceType": "photograph",
+        "dateObserved": "2022-12-07"
+      }
+      ]
+    }
+}
+
+3. product-review: it contains three files:
+coffe-mug.json:
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "https://www.w3.org/2018/credentials/examples/v1",
+    "linked-claim-context.json",
+    "schema-mock-context.json"
+  ],
+  "type": ["VerifiableCredential"],
+  "issuer": {
+    "id": "did:spider123",
+    "name": "ClaimSpider"
+  },
+  "issuanceDate": "2022-01-01T00:00:00Z",
+  "expirationDate": "2025-01-01T00:00:00Z",
+  "credentialSubject": {
+    "id": "https://example.com/products/coffee-mug",
+    "type": ["LinkedClaim", "Review"],
+    "effectiveDate": "1999-01-01", 
+    "aspect": "quality",
+    "statement": "This is a great coffee mug, would buy again.",
+    "reviewRating": {
+        "type": "ReviewRating",  
+        "ratingValue": 5,
+        "bestRating": 5,
+        "worstRating": 1
+    },
+    "source": {
+         "type": "ClaimSource",
+         "id": "https://yelp.com/mugs/12345#review",
+         "sourceType": "web",
+         "digestMultibase": "asdfb897987",
+         "dateObserved": "2021-12-01",
+         "author": "https://yelp.com/users/joe100",
+         "curator": "https://yelp.com"
+      }
+    }
+}
+
+coffe-mug.json.signed:
+{"@context":["https://www.w3.org/2018/credentials/v1","https://www.w3.org/2018/credentials/examples/v1",{"ClaimSource":{"@context":{"author":{"@id":"lc:author","@type":"@id"},"curator":{"@id":"lc:curator","@type":"@id"},"dateObserved":{"@id":"lc:dateObserved","@type":"xsd:dateTime"},"digestMultibase":{"@id":"lc:sourceDigest"},"howKnown":{"@id":"lc:howKnown"},"retrieveFrom":{"@id":"lc:retrieveFrom","@type":"@id"},"sourceType":{"@id":"lc:sourceType"}},"@id":"http://cooperation.org/credentials#ClaimSource"},"LinkedClaim":{"@context":{"aspect":{"@id":"lc:aspect"},"claim":{"@id":"lc:claim"},"confidence":{"@id":"lc:confidence"},"digestMultibase":{"@id":"http://cooperation.org/credentials#digestMultibase"},"effectiveDate":{"@id":"lc:effectiveDate","@type":"xsd:dateTime"},"id":"@id","intendedAudience":{"@id":"lc:intendedAudience"},"lc":"http://cooperation.org/credentials","object":{"@id":"lc:object"},"respondAt":{"@id":"http://cooperation.org/credentials/v1#respondAt","@type":"@id"},"source":{"@id":"lc:source","@type":"lc:ClaimSource"},"statement":{"@id":"lc:statement"}},"@id":"http://cooperation.org/credentials#LinkedClaim"}},{"Review":{"@context":{"reviewRating":{"@id":"https://schema.org#reviewRating","@type":"https://schema.org#ReviewRating"}},"@id":"https://schema.org#Review"},"ReviewRating":{"@context":{"bestRating":{"@id":"schema:bestRating"},"ratingAspect":{"@id":"schema:ratingAspect"},"ratingValue":{"@id":"schema:ratingValue"},"schema":"https://schema.org","worstRating":{"@id":"schema:worstRating"}},"@id":"https://schema.org#ReviewRating"},"DonateAction":{"@context":{"price":{"@id":"schema:price"},"priceCurrency":{"@id":"schema:priceCurrency"},"recipient":{"@id":"schema:recipient"},"schema":"https://schema.org"},"@id":"https://schema.org#DonateAction"}}],"type":["VerifiableCredential"],"credentialSubject":{"id":"https://example.com/products/coffee-mug","type":["LinkedClaim","Review"],"aspect":"quality","effectiveDate":"1999-01-01","statement":"This is a great coffee mug, would buy again.","reviewRating":{"bestRating":5,"ratingValue":5,"type":"ReviewRating","worstRating":1},"source":{"author":"https://yelp.com/users/joe100","curator":"https://yelp.com","dateObserved":"2021-12-01","digestMultibase":"asdfb897987","id":"https://yelp.com/mugs/12345#review","sourceType":"web","type":"ClaimSource"}},"issuer":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","issuanceDate":"2022-01-01T00:00:00Z","proof":{"type":"Ed25519Signature2018","proofPurpose":"assertionMethod","verificationMethod":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1#z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","created":"2022-12-31T03:14:32.583Z","jws":"eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..b2ffRNVOdVngMEPfeg9unwf0wqy5ZnIm0RyUt-GRacJNGqVAuC6LhcnZMCP1y0-LTfTVjY_cuba6-JVqxMJQBg"},"expirationDate":"2025-01-01T00:00:00Z"}
+
+
+ex1.json.signed:
+{"@context":["https://www.w3.org/2018/credentials/v1",{"ClaimSource":{"@context":{"author":{"@id":"lc:author","@type":"@id"},"curator":{"@id":"lc:curator","@type":"@id"},"dateObserved":{"@id":"lc:dateObserved","@type":"xsd:dateTime"},"digestMultibase":{"@id":"lc:sourceDigest"},"howKnown":{"@id":"lc:howKnown"},"retrieveFrom":{"@id":"lc:retrieveFrom","@type":"@id"},"sourceType":{"@id":"lc:sourceType"}},"@id":"http://cooperation.org/credentials#ClaimSource"},"LinkedClaim":{"@context":{"aspect":{"@id":"lc:aspect"},"claim":{"@id":"lc:claim"},"confidence":{"@id":"lc:confidence"},"digestMultibase":{"@id":"http://cooperation.org/credentials#digestMultibase"},"effectiveDate":{"@id":"lc:effectiveDate","@type":"xsd:dateTime"},"id":"@id","intendedAudience":{"@id":"lc:intendedAudience"},"lc":"http://cooperation.org/credentials","object":{"@id":"lc:object"},"respondAt":{"@id":"http://cooperation.org/credentials/v1#respondAt","@type":"@id"},"source":{"@id":"lc:source","@type":"lc:ClaimSource"},"statement":{"@id":"lc:statement"}},"@id":"http://cooperation.org/credentials#LinkedClaim"}}],"type":["VerifiableCredential","LinkedClaim"],"credentialSubject":{"id":"https://example.com/products/coffee-mug","source":{"dateObserved":"2021-12-01","sourceType":"web","type":"ClaimSource"},"effectiveDate":"1999-01-01","type":["LinkedClaim"],"statement":"This is a great coffee mug, would buy again.","claim":"rated"},"issuer":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","issuanceDate":"2022-01-01T00:00:00Z","proof":{"type":"Ed25519Signature2018","proofPurpose":"assertionMethod","verificationMethod":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1#z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","created":"2022-12-31T03:14:32.680Z","jws":"eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..4Z0UV2SDWz9xm-6PCBjKyHDf1VxwFrTJYYotqzf7bLCQxzU-g9vlPTmwWIHGdd6LGYmOxLEw72FdsCx_TQRcCA"}}
+
+4.real-world-harm:it has 2 files:
+activists-disappeared.json.signed:
+{"@context":["https://www.w3.org/2018/credentials/v1",{"LinkedClaim":{"@context":{"aspect":{"@id":"lc:aspect"},"claim":{"@id":"lc:claim"},"confidence":{"@id":"lc:confidence"},"digestMultibase":{"@id":"http://cooperation.org/credentials#digestMultibase"},"effectiveDate":{"@id":"lc:effectiveDate","@type":"xsd:dateTime"},"id":"@id","intendedAudience":{"@id":"lc:intendedAudience"},"lc":"http://cooperation.org/credentials","object":{"@id":"lc:object"},"respondAt":{"@id":"http://cooperation.org/credentials/v1#respondAt","@type":"@id"},"source":{"@id":"lc:source","@type":"lc:ClaimSource"},"statement":{"@id":"lc:statement"}},"@id":"http://cooperation.org/credentials#LinkedClaim"},"ClaimSource":{"@context":{"author":{"@id":"lc:author","@type":"@id"},"curator":{"@id":"lc:curator","@type":"@id"},"dateObserved":{"@id":"lc:dateObserved","@type":"xsd:dateTime"},"digestMultibase":{"@id":"lc:sourceDigest"},"howKnown":{"@id":"lc:howKnown"},"retrieveFrom":{"@id":"lc:retrieveFrom","@type":"@id"},"sourceType":{"@id":"lc:sourceType"}},"@id":"http://cooperation.org/credentials#ClaimSource"}},{"Risk":{"@context":{"incidentClaim":{"@id":"http://cooperation.org/credentials/risk#incidentClaim","@type":"http://cooperation.org/credentials/risk#IncidentClaim"}},"@id":"http://cooperation.org/credentials/risk#Risk"},"IncidentClaim":{"@context":{"incidentDate":{"@id":"http://cooperation.org/credentials/risk#incidentDate"},"incidentType":{"@id":"http://cooperation.org/credentials/risk#incidentType"},"narrative":{"@id":"http://cooperation.org/credentials/risk#narrative"}},"@id":"http://cooperation.org/credentials/risk#IncidentClaim"}}],"type":["VerifiableCredential"],"credentialSubject":{"id":"https://en.wikipedia.org/wiki/State_Administration_Council","type":["LinkedClaim","Risk"],"effectiveDate":"2022-4-21","statement":"Seven students from Yangon’s Dagon University are believed to have been abducted by the military","claim":"HumanRightsViolation","aspect":"risk:justice","incidentClaim":[{"incidentDate":"2022-04-21","incidentType":"enforcedDisappearance","narrative":"On April 21, five of the students disappeared after one revealed in a phone call with Dagon University Student Union chairperson Min Htet Han that a military truck was entering their street in Bahan Township.  The students were identified as Khant Zin Win, Thura Maung Maung, Zaw Lin Naing, Thiha Htet Zaw and Hein Htet.","type":"IncidentClaim"},{"incidentDate":"2022-04-22","incidentType":"enforcedDisappearance","narrative":"The next day, two of their colleagues—Thet Paing Oo and Khant Lin Maung Maung—also reportedly went missing.","type":"IncidentClaim"}],"source":{"dateObserved":"2022-12-20","id":"https://myanmar-now.org/en/news/missing-dagon-university-students-believed-to-be-in-junta-custody","sourceType":"article","type":"ClaimSource"}},"issuer":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","issuanceDate":"2022-12-30T00:00:00Z","proof":{"type":"Ed25519Signature2018","proofPurpose":"assertionMethod","verificationMethod":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1#z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","created":"2022-12-31T03:14:32.773Z","jws":"eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..vx3ACcNTsxr-mupCewgmk8Z2wn7aK0mQAyRG-cLHOQD8Kp3rueiI9dqlLoblN7X6m7NUhNWHQ1TIJZZrrynVCQ"}}
+junta-business-partner.json.signed:
+{"@context":["https://www.w3.org/2018/credentials/v1",{"LinkedClaim":{"@context":{"aspect":{"@id":"lc:aspect"},"claim":{"@id":"lc:claim"},"confidence":{"@id":"lc:confidence"},"digestMultibase":{"@id":"http://cooperation.org/credentials#digestMultibase"},"effectiveDate":{"@id":"lc:effectiveDate","@type":"xsd:dateTime"},"id":"@id","intendedAudience":{"@id":"lc:intendedAudience"},"lc":"http://cooperation.org/credentials","object":{"@id":"lc:object"},"respondAt":{"@id":"http://cooperation.org/credentials/v1#respondAt","@type":"@id"},"source":{"@id":"lc:source","@type":"lc:ClaimSource"},"statement":{"@id":"lc:statement"}},"@id":"http://cooperation.org/credentials#LinkedClaim"},"ClaimSource":{"@context":{"author":{"@id":"lc:author","@type":"@id"},"curator":{"@id":"lc:curator","@type":"@id"},"dateObserved":{"@id":"lc:dateObserved","@type":"xsd:dateTime"},"digestMultibase":{"@id":"lc:sourceDigest"},"howKnown":{"@id":"lc:howKnown"},"retrieveFrom":{"@id":"lc:retrieveFrom","@type":"@id"},"sourceType":{"@id":"lc:sourceType"}},"@id":"http://cooperation.org/credentials#ClaimSource"}}],"type":["VerifiableCredential"],"credentialSubject":{"id":"http://www.posco.com","type":["LinkedClaim"],"object":"https://en.wikipedia.org/wiki/State_Administration_Council","effectiveDate":"2022-4-21","statement":"POSCO operates a steel joint venture (Myanmar POSCO C&C) with military conglomerate MEHL","source":{"curator":"https://www.justiceformyanmar.org/","dateObserved":"2022-12-20","id":"https://data.justiceformyanmar.org/#joint-ventures-with-military","sourceType":"web","type":"ClaimSource"},"claim":"related:businessPartner"},"issuer":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","issuanceDate":"2022-12-30T00:00:00Z","proof":{"type":"Ed25519Signature2018","proofPurpose":"assertionMethod","verificationMethod":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1#z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","created":"2022-12-31T03:14:32.867Z","jws":"eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..Jbn9Zll9OSYpUGrBEyj838rkKxKs15WnluMPYwz0LP-kutCo1zcGQMF3J3jShMh3Nfy797aFZOOTVQeiffsJBQ"}}
+
+5.self-asserted-skill: it has 6 files:
+Narrative.md: Alice has worked in warehouse distribution centers since she dropped out of high school to earn money to support her mother, and siblings, after her mother was forced to recuperate from injuries incurred in a vehicle accident.
+
+Alice started as a custodian but over time and through observation and conversation with her co-workers she learned she could get trained to drive a warehouse forklift and significantly increase her earning potential. She enrolled in class 4 OSHA certified forklift driver training course while continuing her night custodian job. After receiving her certification she applied for a forklift driver opening at the company where she was employed but sought corroboration of her skills both from her instructors at ISETA (Bootcamp 1.0) and the forklift specialization course, along with an LinkedClaim from her current supervisor attesting to her reliability, teamwork, and attention to detail she has expressed in her current job.
+
+Alice sends the self-asserted credential describing her skills relevant to the forklift driver position to Bob, her instructor ay ISETA of the OSHA forklift training course by email and points out the attributes she thinks he can attest to amongst her skill claims.
+
+Alice does the same thing sending her self-assertion credential to Juanita,her current supervisor, pointing out those attributes she suggests Juanita has direct knowledge about her performance.
+
+Both Bob and Juanita construct a linked-claims Verifiable Credential endorsing Alice for those attributes they have expertise in and can address with professional credibility based on their own bona fides included in their relevance arrestations describing their own training and background.
+
+Juanita and Bob send their self-asserted skill LinkedClaims to Alice after binding their attributions to those skills and competencies based on their knowledge of Alice’s capabilities. Alice selects these credentials for inclusion in the set she prepares as a verifiable presentation to submit to the job application site.
+
+alice.json:
+{"@context": ["https://www.w3.org/2018/credentials/v1",
+              "linked-claim-context.json",
+              "v3p0-context.json"
+             ],
+ "type": ["VerifiableCredential", "LinkedClaim", "AchievementSubject"],
+
+ "credentialSubject": {
+    "id": "https://alice123.com",
+    "type": ["LinkedClaim", "AchievementSubject"],
+    "effectiveDate": "2021-06-01",
+    "achievement": [ {
+        "id": "cid:kjzl6cwe1jw145vgtd06xrayaq91lw1ddag7p97z38fqgq5a5cres",
+        "type": "Achievement",
+        "name": "OSHA Forklift Safety Training - 30 hr",
+        "description": "Employer provided Forklift safety training in compliance with OSHA 29 CFR 1910.178(I) including formal instruction, demonstration and evaluations on the job"
+    },
+    {
+        "id": "cid:k1dpgaqe3i64kjuyet4w0zytd06xzraqwamf9wrp1jim19y27veqk",
+        "type": "Achievement",
+        "name": "Two years warehouse forklift experience",
+        "description": "Operated a forklift at the Acme warehouse"
+    }]
+  },
+  "issuanceDate": "2022-01-02T21:36:59Z"
+}
+
+alice.json.signed:
+{"@context":["https://www.w3.org/2018/credentials/v1",{"ClaimSource":{"@context":{"author":{"@id":"lc:author","@type":"@id"},"curator":{"@id":"lc:curator","@type":"@id"},"dateObserved":{"@id":"lc:dateObserved","@type":"xsd:dateTime"},"digestMultibase":{"@id":"lc:sourceDigest"},"howKnown":{"@id":"lc:howKnown"},"retrieveFrom":{"@id":"lc:retrieveFrom","@type":"@id"},"sourceType":{"@id":"lc:sourceType"}},"@id":"http://cooperation.org/credentials#ClaimSource"},"LinkedClaim":{"@context":{"aspect":{"@id":"lc:aspect"},"claim":{"@id":"lc:claim"},"confidence":{"@id":"lc:confidence"},"digestMultibase":{"@id":"http://cooperation.org/credentials#digestMultibase"},"effectiveDate":{"@id":"lc:effectiveDate","@type":"xsd:dateTime"},"id":"@id","intendedAudience":{"@id":"lc:intendedAudience"},"lc":"http://cooperation.org/credentials","object":{"@id":"lc:object"},"respondAt":{"@id":"http://cooperation.org/credentials/v1#respondAt","@type":"@id"},"source":{"@id":"lc:source","@type":"lc:ClaimSource"},"statement":{"@id":"lc:statement"}},"@id":"http://cooperation.org/credentials#LinkedClaim"}},{"Recommendation":{"@context":{"recommender":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#recommender","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Recommender"},"statement":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#recommendationStatement"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Recommendation"},"GeoCoordinates":{"@context":{"latitude":{"@id":"https://schema.org/latitude","@type":"xsd:string"},"longitude":{"@id":"https://schema.org/longitude","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#GeoCoordinates"},"ResultDescription":{"@context":{"allowedValue":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#allowedValue","@type":"xsd:string"},"requiredLevel":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#requiredLevel","@type":"xsd:anyURI"},"requiredValue":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#requiredValue","@type":"xsd:string"},"resultType":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#resultType","@type":"xsd:string"},"rubricCriterionLevel":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#rubricCriterionLevel","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#RubricCriterionLevel"},"valueMax":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#valueMax","@type":"xsd:string"},"valueMin":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#valueMin","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#ResultDescription"},"Achievement":{"@context":{"achievementType":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#achievementType","@type":"xsd:string"},"alignment":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#alignment","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Alignment"},"creator":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Profile"},"creditsAvailable":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#creditsAvailable","@type":"xsd:float"},"criteria":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Criteria","@type":"@id"},"fieldOfStudy":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#fieldOfStudy","@type":"xsd:string"},"humanCode":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#humanCode","@type":"xsd:string"},"otherIdentifier":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#otherIdentifier","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#IdentifierEntry"},"related":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#related","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Related"},"resultDescription":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#resultDescription","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#ResultDescription"},"specialization":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#specialization","@type":"xsd:string"},"tag":{"@container":"@set","@id":"https://schema.org/keywords","@type":"xsd:string"},"version":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#version","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Achievement"},"narrative":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#narrative","@type":"xsd:string"},"AchievementCredential":{"@id":"OpenBadgeCredential"},"Recommender":{"@context":{"relevance":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#relevance"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Recommender"},"OpenBadgeCredential":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#OpenBadgeCredential"},"IdentifierEntry":{"@context":{"identifier":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#identifier","@type":"xsd:string"},"identifierType":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#identifierType","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#IdentifierEntry"},"Related":{"@context":{"version":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#version","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Related"},"url":{"@id":"https://schema.org/url","@type":"xsd:anyURI"},"Profile":{"@context":{"additionalName":{"@id":"https://schema.org/additionalName","@type":"xsd:string"},"address":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Address"},"dateOfBirth":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#dateOfBirth","@type":"xsd:date"},"email":{"@id":"https://schema.org/email","@type":"xsd:string"},"familyName":{"@id":"https://schema.org/familyName","@type":"xsd:string"},"familyNamePrefix":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#familyNamePrefix","@type":"xsd:string"},"givenName":{"@id":"https://schema.org/givenName","@type":"xsd:string"},"honorificPrefix":{"@id":"https://schema.org/honorificPrefix","@type":"xsd:string"},"honorificSuffix":{"@id":"https://schema.org/honorificSuffix","@type":"xsd:string"},"official":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#official","@type":"xsd:string"},"otherIdentifier":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#otherIdentifier","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#IdentifierEntry"},"parentOrg":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#parentOrg","@type":"xsd:string"},"patronymicName":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#patronymicName","@type":"xsd:string"},"phone":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#PhoneNumber","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Profile"},"endorsement":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#endorsement","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#RecommendationCredential"},"Address":{"@context":{"addressCountry":{"@id":"https://schema.org/addressCountry","@type":"xsd:string"},"addressCountryCode":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#CountryCode","@type":"xsd:string"},"addressLocality":{"@id":"https://schema.org/addressLocality","@type":"xsd:string"},"addressRegion":{"@id":"https://schema.org/addressRegion","@type":"xsd:string"},"geo":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#GeoCoordinates"},"postOfficeBoxNumber":{"@id":"https://schema.org/postOfficeBoxNumber","@type":"xsd:string"},"postalCode":{"@id":"https://schema.org/postalCode","@type":"xsd:string"},"streetAddress":{"@id":"https://schema.org/streetAddress","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Address"},"AchievementSubject":{"@context":{"achievement":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Achievement"},"activityEndDate":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#activityEndDate","@type":"xsd:date"},"activityStartDate":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#activityStartDate","@type":"xsd:date"},"creditsEarned":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#creditsEarned","@type":"xsd:float"},"identifier":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#identifier","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#IdentityObject"},"licenseNumber":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#licenseNumber","@type":"xsd:string"},"result":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#result","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Result"},"role":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#role","@type":"xsd:string"},"source":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#source","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Profile"},"term":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#term","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#AchievementSubject"},"Image":{"@context":{"caption":{"@id":"https://schema.org/caption","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Image"},"description":{"@id":"https://schema.org/description","@type":"xsd:string"},"Alignment":{"@context":{"targetCode":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#targetCode","@type":"xsd:string"},"targetDescription":{"@id":"https://schema.org/targetDescription","@type":"xsd:string"},"targetFramework":{"@id":"https://schema.org/targetFramework","@type":"xsd:string"},"targetName":{"@id":"https://schema.org/targetName","@type":"xsd:string"},"targetType":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#targetType","@type":"xsd:string"},"targetUrl":{"@id":"https://schema.org/targetUrl","@type":"xsd:anyURI"}},"@id":"https://schema.org/Alignment"},"RubricCriterionLevel":{"@context":{"level":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#level","@type":"xsd:string"},"points":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#points","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#RubricCriterionLevel"},"RecommendationCredential":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#RecommendationCredential"},"Evidence":{"@context":{"audience":{"@id":"https://schema.org/audience","@type":"xsd:string"},"genre":{"@id":"https://schema.org/genre","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Evidence"},"name":{"@id":"https://schema.org/name","@type":"xsd:string"},"image":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#image","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Image"},"Criteria":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Criteria"},"RecommendationSubject":{"@context":{"recommendation":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#recommendation","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Recommendation"},"recommendationComment":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#endorsementComment","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#RecommendationSubject"},"Result":{"@context":{"achievedLevel":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#achievedLevel","@type":"xsd:anyURI"},"resultDescription":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#resultDescription","@type":"xsd:anyURI"},"status":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#status","@type":"xsd:string"},"value":{"@id":"https://schema.org/value","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Result"},"alignment":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#alignment","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Alignment"},"IdentityObject":{"@context":{"hashed":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#hashed","@type":"xsd:boolean"},"identityHash":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#identityHash","@type":"xsd:string"},"identityType":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#identityType","@type":"xsd:string"},"salt":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#salt","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#IdentityObject"}}],"type":["VerifiableCredential","LinkedClaim","AchievementSubject"],"credentialSubject":{"id":"https://alice123.com","type":["LinkedClaim","AchievementSubject"],"effectiveDate":"2021-06-01","achievement":[{"description":"Employer provided Forklift safety training in compliance with OSHA 29 CFR 1910.178(I) including formal instruction, demonstration and evaluations on the job","id":"cid:kjzl6cwe1jw145vgtd06xrayaq91lw1ddag7p97z38fqgq5a5cres","name":"OSHA Forklift Safety Training - 30 hr","type":"Achievement"},{"description":"Operated a forklift at the Acme warehouse","id":"cid:k1dpgaqe3i64kjuyet4w0zytd06xzraqwamf9wrp1jim19y27veqk","name":"Two years warehouse forklift experience","type":"Achievement"}]},"issuer":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","issuanceDate":"2022-01-02T21:36:59Z","proof":{"type":"Ed25519Signature2018","proofPurpose":"assertionMethod","verificationMethod":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1#z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","created":"2022-12-31T03:14:32.959Z","jws":"eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..yfu-8TRFT7AMNdOw-pn65gcXSKofCRV45kc2V1mbuQGna4-3c_zDLF5XTSd-Sj9twyv0Yhd8qRUp8czkGMv_BQ"}}
+
+atest.json.signed:
+Tried to sign credential: 
+{'@context': ['https://www.w3.org/2018/credentials/v1'],
+ 'credentialSubject': {'id': 'https://alice123.com'},
+ 'issuanceDate': '2022-01-02',
+ 'issuer': 'did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1',
+ 'type': ['VerifiableCredential']}
+
+bob.json:
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "v3p0-context.json",
+    "linked-claim-context.json"
+  ],
+  "type": [ "VerifiableCredential", "LinkedClaim", "RecommendationSubject"  ],
+  "issuer": {
+    "id": "did:web:bob.example.com",
+    "name": "Bob"
+  },
+  "issuanceDate": "2010-01-01T00:00:00Z",
+  "expirationDate": "2020-01-01T00:00:00Z",
+  "credentialSubject": {
+    "id": "cid:kjzl6cwe1jw145vgtd06xrayaq91lw1ddag7p97z38fqgq5a5cre",
+    "name": "OSHA Forklift Safety Training - 30 hr",
+    "type": ["LinkedClaim", "RecommendationSubject" ],
+    "digestMultibase": "zb1B1M6Bve5JEaNqeJSmuE",
+    "effectiveDate": "2022-01-01",
+    "recommendation": {
+      "id": "cid:if9vl3kjfsldjfasz83aslkjfkjvbvnalvoiwnefoxkefnelkaqo",
+      "type": "Recommendation",
+      "statement": "Alice passed the OSHA training class with flying colors, she had perfect attendance and demonstrated full understanding of the material",
+      "recommender": {
+          "id": "did:web:bob.example.com",
+          "type": "Recommender",
+          "relevance": [
+            {
+             "id": "https://SmartResume.com/bob",
+             "type": "LinkedClaim",
+             "digestMultibase": "asdfasdfadf",
+             "description": "Bob is an OSHA-certified instructor"
+            },
+            {
+             "id": "https://linkedin.com/Bob",
+             "description": "Bob taught the OSHA class referenced in the credential"
+            }
+          ]
+      }
+    }
+  }
+}
+
+bob.json.signed:
+{"@context":["https://www.w3.org/2018/credentials/v1",{"OpenBadgeCredential":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#OpenBadgeCredential"},"Alignment":{"@context":{"targetCode":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#targetCode","@type":"xsd:string"},"targetDescription":{"@id":"https://schema.org/targetDescription","@type":"xsd:string"},"targetFramework":{"@id":"https://schema.org/targetFramework","@type":"xsd:string"},"targetName":{"@id":"https://schema.org/targetName","@type":"xsd:string"},"targetType":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#targetType","@type":"xsd:string"},"targetUrl":{"@id":"https://schema.org/targetUrl","@type":"xsd:anyURI"}},"@id":"https://schema.org/Alignment"},"RecommendationSubject":{"@context":{"recommendation":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#recommendation","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Recommendation"},"recommendationComment":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#endorsementComment","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#RecommendationSubject"},"Recommender":{"@context":{"relevance":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#relevance"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Recommender"},"Image":{"@context":{"caption":{"@id":"https://schema.org/caption","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Image"},"Related":{"@context":{"version":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#version","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Related"},"ResultDescription":{"@context":{"allowedValue":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#allowedValue","@type":"xsd:string"},"requiredLevel":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#requiredLevel","@type":"xsd:anyURI"},"requiredValue":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#requiredValue","@type":"xsd:string"},"resultType":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#resultType","@type":"xsd:string"},"rubricCriterionLevel":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#rubricCriterionLevel","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#RubricCriterionLevel"},"valueMax":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#valueMax","@type":"xsd:string"},"valueMin":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#valueMin","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#ResultDescription"},"description":{"@id":"https://schema.org/description","@type":"xsd:string"},"name":{"@id":"https://schema.org/name","@type":"xsd:string"},"RecommendationCredential":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#RecommendationCredential"},"IdentityObject":{"@context":{"hashed":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#hashed","@type":"xsd:boolean"},"identityHash":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#identityHash","@type":"xsd:string"},"identityType":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#identityType","@type":"xsd:string"},"salt":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#salt","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#IdentityObject"},"Achievement":{"@context":{"achievementType":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#achievementType","@type":"xsd:string"},"alignment":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#alignment","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Alignment"},"creator":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Profile"},"creditsAvailable":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#creditsAvailable","@type":"xsd:float"},"criteria":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Criteria","@type":"@id"},"fieldOfStudy":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#fieldOfStudy","@type":"xsd:string"},"humanCode":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#humanCode","@type":"xsd:string"},"otherIdentifier":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#otherIdentifier","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#IdentifierEntry"},"related":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#related","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Related"},"resultDescription":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#resultDescription","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#ResultDescription"},"specialization":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#specialization","@type":"xsd:string"},"tag":{"@container":"@set","@id":"https://schema.org/keywords","@type":"xsd:string"},"version":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#version","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Achievement"},"Address":{"@context":{"addressCountry":{"@id":"https://schema.org/addressCountry","@type":"xsd:string"},"addressCountryCode":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#CountryCode","@type":"xsd:string"},"addressLocality":{"@id":"https://schema.org/addressLocality","@type":"xsd:string"},"addressRegion":{"@id":"https://schema.org/addressRegion","@type":"xsd:string"},"geo":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#GeoCoordinates"},"postOfficeBoxNumber":{"@id":"https://schema.org/postOfficeBoxNumber","@type":"xsd:string"},"postalCode":{"@id":"https://schema.org/postalCode","@type":"xsd:string"},"streetAddress":{"@id":"https://schema.org/streetAddress","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Address"},"GeoCoordinates":{"@context":{"latitude":{"@id":"https://schema.org/latitude","@type":"xsd:string"},"longitude":{"@id":"https://schema.org/longitude","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#GeoCoordinates"},"AchievementSubject":{"@context":{"achievement":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Achievement"},"activityEndDate":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#activityEndDate","@type":"xsd:date"},"activityStartDate":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#activityStartDate","@type":"xsd:date"},"creditsEarned":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#creditsEarned","@type":"xsd:float"},"identifier":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#identifier","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#IdentityObject"},"licenseNumber":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#licenseNumber","@type":"xsd:string"},"result":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#result","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Result"},"role":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#role","@type":"xsd:string"},"source":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#source","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Profile"},"term":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#term","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#AchievementSubject"},"Evidence":{"@context":{"audience":{"@id":"https://schema.org/audience","@type":"xsd:string"},"genre":{"@id":"https://schema.org/genre","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Evidence"},"AchievementCredential":{"@id":"OpenBadgeCredential"},"Result":{"@context":{"achievedLevel":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#achievedLevel","@type":"xsd:anyURI"},"resultDescription":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#resultDescription","@type":"xsd:anyURI"},"status":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#status","@type":"xsd:string"},"value":{"@id":"https://schema.org/value","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Result"},"alignment":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#alignment","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Alignment"},"Recommendation":{"@context":{"recommender":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#recommender","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Recommender"},"statement":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#recommendationStatement"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Recommendation"},"IdentifierEntry":{"@context":{"identifier":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#identifier","@type":"xsd:string"},"identifierType":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#identifierType","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#IdentifierEntry"},"image":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#image","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Image"},"url":{"@id":"https://schema.org/url","@type":"xsd:anyURI"},"Criteria":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Criteria"},"endorsement":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#endorsement","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#RecommendationCredential"},"narrative":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#narrative","@type":"xsd:string"},"Profile":{"@context":{"additionalName":{"@id":"https://schema.org/additionalName","@type":"xsd:string"},"address":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Address"},"dateOfBirth":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#dateOfBirth","@type":"xsd:date"},"email":{"@id":"https://schema.org/email","@type":"xsd:string"},"familyName":{"@id":"https://schema.org/familyName","@type":"xsd:string"},"familyNamePrefix":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#familyNamePrefix","@type":"xsd:string"},"givenName":{"@id":"https://schema.org/givenName","@type":"xsd:string"},"honorificPrefix":{"@id":"https://schema.org/honorificPrefix","@type":"xsd:string"},"honorificSuffix":{"@id":"https://schema.org/honorificSuffix","@type":"xsd:string"},"official":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#official","@type":"xsd:string"},"otherIdentifier":{"@container":"@set","@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#otherIdentifier","@type":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#IdentifierEntry"},"parentOrg":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#parentOrg","@type":"xsd:string"},"patronymicName":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#patronymicName","@type":"xsd:string"},"phone":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#PhoneNumber","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#Profile"},"RubricCriterionLevel":{"@context":{"level":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#level","@type":"xsd:string"},"points":{"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#points","@type":"xsd:string"}},"@id":"https://purl.imsglobal.org/spec/vc/ob/vocab.html#RubricCriterionLevel"}},{"LinkedClaim":{"@context":{"aspect":{"@id":"lc:aspect"},"claim":{"@id":"lc:claim"},"confidence":{"@id":"lc:confidence"},"digestMultibase":{"@id":"http://cooperation.org/credentials#digestMultibase"},"effectiveDate":{"@id":"lc:effectiveDate","@type":"xsd:dateTime"},"id":"@id","intendedAudience":{"@id":"lc:intendedAudience"},"lc":"http://cooperation.org/credentials","object":{"@id":"lc:object"},"respondAt":{"@id":"http://cooperation.org/credentials/v1#respondAt","@type":"@id"},"source":{"@id":"lc:source","@type":"lc:ClaimSource"},"statement":{"@id":"lc:statement"}},"@id":"http://cooperation.org/credentials#LinkedClaim"},"ClaimSource":{"@context":{"author":{"@id":"lc:author","@type":"@id"},"curator":{"@id":"lc:curator","@type":"@id"},"dateObserved":{"@id":"lc:dateObserved","@type":"xsd:dateTime"},"digestMultibase":{"@id":"lc:sourceDigest"},"howKnown":{"@id":"lc:howKnown"},"retrieveFrom":{"@id":"lc:retrieveFrom","@type":"@id"},"sourceType":{"@id":"lc:sourceType"}},"@id":"http://cooperation.org/credentials#ClaimSource"}}],"type":["VerifiableCredential","LinkedClaim","RecommendationSubject"],"credentialSubject":{"id":"cid:kjzl6cwe1jw145vgtd06xrayaq91lw1ddag7p97z38fqgq5a5cre","type":["LinkedClaim","RecommendationSubject"],"name":"OSHA Forklift Safety Training - 30 hr","digestMultibase":"zb1B1M6Bve5JEaNqeJSmuE","effectiveDate":"2022-01-01","recommendation":{"id":"cid:if9vl3kjfsldjfasz83aslkjfkjvbvnalvoiwnefoxkefnelkaqo","recommender":{"id":"did:web:bob.example.com","relevance":[{"description":"Bob is an OSHA-certified instructor","digestMultibase":"asdfasdfadf","id":"https://SmartResume.com/bob","type":"LinkedClaim"},{"description":"Bob taught the OSHA class referenced in the credential","id":"https://linkedin.com/Bob"}],"type":"Recommender"},"statement":"Alice passed the OSHA training class with flying colors, she had perfect attendance and demonstrated full understanding of the material","type":"Recommendation"}},"issuer":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","issuanceDate":"2010-01-01T00:00:00Z","proof":{"type":"Ed25519Signature2018","proofPurpose":"assertionMethod","verificationMethod":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1#z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","created":"2022-12-31T03:14:33.056Z","jws":"eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..U9gBclQunkdDW9e5idRPkXpowHwYgnaJGaaMe1F5z2bMshk8UZJphxDSYh8IxcIyJ7E59GSH_mkKQLl5FMmTDg"},"expirationDate":"2020-01-01T00:00:00Z"}
+
+6.social-impact: it has 11 files:
+Narrative.md: This narrative is about two NGOs, one of which legitimately helps recipients and the other which inflates their claims. For accoutnability, the funders of the NGOs have asked them to identify the DIDs of recipients and provide a secure interface for those recipients to privately review the impact of the NGOs. In addition, they may attest to each other's credibility.
+
+The NGO Helpers Intl donated a smart phone to Kiyana, who appreciated it and provided a direct positive review, including an estimate of the donation value of $200 USD.
+
+The NGO Fakers Intl claimed to have helped Kiyano to get a new house and job with a total value of $20000 USD.
+
+Kiyano independently reviewed Fakers Intl and disputed the specific claim, giving information that he had been paid only $20 to go to the site and support them.
+
+Filbert attested to Kiyano's credibility with a claim that Kiyano had once lent him money to pay his rent.
+
+In this case the funders might want to make the claims from recipient privately encrypted for their security, and return only aggregate scores.
+
+ngo-claim-disputed.json:
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "linked-claim-context.json",
+    "schema-mock-context.json"
+  ],
+  "type": ["VerifiableCredential"],
+  "issuer": {
+    "id": "did:kiyanok888",
+    "name": "Kiyano"
+  },
+  "issuanceDate": "2022-12-01T00:00:00Z",
+  "credentialSubject": {
+    "id": "cid:09871234324",
+    "digestMultibase": "iJFZERTQSIsImNyaXQiOlsiYjY0Il0s",
+    "type": ["LinkedClaim", "Review"],
+    "effectiveDate": "2022-11-01", 
+    "statement": "This claim is not true I definitely did not get any $20000 benefit. They gave me $20 and had an event with bad food. I would like to get a new house like they said how can I do that",
+    "reviewRating": {
+        "type": "ReviewRating",
+        "ratingValue": 0,
+        "bestRating": 5,
+        "worstRating": 0,
+        "ratingAspect": "accuracy"
+    }
+  }
+}
+
+ngo-claim-disputed.json.signed:
+{"@context":["https://www.w3.org/2018/credentials/v1",{"ClaimSource":{"@context":{"author":{"@id":"lc:author","@type":"@id"},"curator":{"@id":"lc:curator","@type":"@id"},"dateObserved":{"@id":"lc:dateObserved","@type":"xsd:dateTime"},"digestMultibase":{"@id":"lc:sourceDigest"},"howKnown":{"@id":"lc:howKnown"},"retrieveFrom":{"@id":"lc:retrieveFrom","@type":"@id"},"sourceType":{"@id":"lc:sourceType"}},"@id":"http://cooperation.org/credentials#ClaimSource"},"LinkedClaim":{"@context":{"aspect":{"@id":"lc:aspect"},"claim":{"@id":"lc:claim"},"confidence":{"@id":"lc:confidence"},"digestMultibase":{"@id":"http://cooperation.org/credentials#digestMultibase"},"effectiveDate":{"@id":"lc:effectiveDate","@type":"xsd:dateTime"},"id":"@id","intendedAudience":{"@id":"lc:intendedAudience"},"lc":"http://cooperation.org/credentials","object":{"@id":"lc:object"},"respondAt":{"@id":"http://cooperation.org/credentials/v1#respondAt","@type":"@id"},"source":{"@id":"lc:source","@type":"lc:ClaimSource"},"statement":{"@id":"lc:statement"}},"@id":"http://cooperation.org/credentials#LinkedClaim"}},{"Review":{"@context":{"reviewRating":{"@id":"https://schema.org#reviewRating","@type":"https://schema.org#ReviewRating"}},"@id":"https://schema.org#Review"},"DonateAction":{"@context":{"price":{"@id":"schema:price"},"priceCurrency":{"@id":"schema:priceCurrency"},"recipient":{"@id":"schema:recipient"},"schema":"https://schema.org"},"@id":"https://schema.org#DonateAction"},"ReviewRating":{"@context":{"bestRating":{"@id":"schema:bestRating"},"ratingAspect":{"@id":"schema:ratingAspect"},"ratingValue":{"@id":"schema:ratingValue"},"schema":"https://schema.org","worstRating":{"@id":"schema:worstRating"}},"@id":"https://schema.org#ReviewRating"}}],"type":["VerifiableCredential"],"credentialSubject":{"id":"cid:09871234324","statement":"This claim is not true I definitely did not get any $20000 benefit. They gave me $20 and had an event with bad food. I would like to get a new house like they said how can I do that","reviewRating":{"bestRating":5,"ratingAspect":"accuracy","ratingValue":0,"type":"ReviewRating","worstRating":0},"digestMultibase":"iJFZERTQSIsImNyaXQiOlsiYjY0Il0s","effectiveDate":"2022-11-01","type":["LinkedClaim","Review"]},"issuer":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","issuanceDate":"2022-12-01T00:00:00Z","proof":{"type":"Ed25519Signature2018","proofPurpose":"assertionMethod","verificationMethod":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1#z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","created":"2022-12-31T03:14:33.155Z","jws":"eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..YnIifkGRoSQWXOaxOv-PX8xIkAq3-B1DENw15U6CkLX2519OGWKgXI6k70dH4ZJjhsIFne8uPgKMJjiIfIXWAA"}}
+
+ngo-disgruntled-recipient.json:
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "linked-claim-context.json",
+    "schema-mock-context.json"
+  ],
+  "type": ["VerifiableCredential"],
+  "issuer": {
+    "id": "did:kiyanok888",
+    "name": "Kiyano"
+  },
+  "issuanceDate": "2022-12-01T00:00:00Z",
+  "credentialSubject": {
+    "id": "did:ngo987",
+    "type": ["LinkedClaim", "Review"],
+    "effectiveDate": "2022-11-01", 
+    "statement": "NGO Fakers Intl never got me the job they promised and I had to move out of my home to the slum area and take a job carrying manure.  I am writing this review so they stop pretending to help us.  Please do not share my name with them.",
+    "reviewRating": {
+        "type": "ReviewRating",  
+        "ratingValue": 1,
+        "bestRating": 5,
+        "worstRating": 0,
+        "ratingAspect": "impact"
+    },
+    "source": {
+         "type": "ClaimSource",
+         "id": "did:kiyanok888",
+         "sourceType": "firstHand",
+         "dateObserved": "2022-11-01"
+      }
+    }
+}
+
+ngo-disgruntled-recipient.json.signed:
+{"@context":["https://www.w3.org/2018/credentials/v1",{"LinkedClaim":{"@context":{"aspect":{"@id":"lc:aspect"},"claim":{"@id":"lc:claim"},"confidence":{"@id":"lc:confidence"},"digestMultibase":{"@id":"http://cooperation.org/credentials#digestMultibase"},"effectiveDate":{"@id":"lc:effectiveDate","@type":"xsd:dateTime"},"id":"@id","intendedAudience":{"@id":"lc:intendedAudience"},"lc":"http://cooperation.org/credentials","object":{"@id":"lc:object"},"respondAt":{"@id":"http://cooperation.org/credentials/v1#respondAt","@type":"@id"},"source":{"@id":"lc:source","@type":"lc:ClaimSource"},"statement":{"@id":"lc:statement"}},"@id":"http://cooperation.org/credentials#LinkedClaim"},"ClaimSource":{"@context":{"author":{"@id":"lc:author","@type":"@id"},"curator":{"@id":"lc:curator","@type":"@id"},"dateObserved":{"@id":"lc:dateObserved","@type":"xsd:dateTime"},"digestMultibase":{"@id":"lc:sourceDigest"},"howKnown":{"@id":"lc:howKnown"},"retrieveFrom":{"@id":"lc:retrieveFrom","@type":"@id"},"sourceType":{"@id":"lc:sourceType"}},"@id":"http://cooperation.org/credentials#ClaimSource"}},{"DonateAction":{"@context":{"price":{"@id":"schema:price"},"priceCurrency":{"@id":"schema:priceCurrency"},"recipient":{"@id":"schema:recipient"},"schema":"https://schema.org"},"@id":"https://schema.org#DonateAction"},"Review":{"@context":{"reviewRating":{"@id":"https://schema.org#reviewRating","@type":"https://schema.org#ReviewRating"}},"@id":"https://schema.org#Review"},"ReviewRating":{"@context":{"bestRating":{"@id":"schema:bestRating"},"ratingAspect":{"@id":"schema:ratingAspect"},"ratingValue":{"@id":"schema:ratingValue"},"schema":"https://schema.org","worstRating":{"@id":"schema:worstRating"}},"@id":"https://schema.org#ReviewRating"}}],"type":["VerifiableCredential"],"credentialSubject":{"id":"did:ngo987","statement":"NGO Fakers Intl never got me the job they promised and I had to move out of my home to the slum area and take a job carrying manure.  I am writing this review so they stop pretending to help us.  Please do not share my name with them.","type":["LinkedClaim","Review"],"source":{"dateObserved":"2022-11-01","id":"did:kiyanok888","sourceType":"firstHand","type":"ClaimSource"},"reviewRating":{"bestRating":5,"ratingAspect":"impact","ratingValue":1,"type":"ReviewRating","worstRating":0},"effectiveDate":"2022-11-01"},"issuer":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","issuanceDate":"2022-12-01T00:00:00Z","proof":{"type":"Ed25519Signature2018","proofPurpose":"assertionMethod","verificationMethod":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1#z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","created":"2022-12-31T03:14:33.250Z","jws":"eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..1qwydMkDxMrXjvVU_oEqExYQRMMUwtButV-HptnTyPuX4SICo0TocbBfHKX1-34zEQVFlSr-HaNs2e7fnVblAQ"}}
+
+ngo-recipient-attestation.json:
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "linked-claim-context.json",
+    "impact-mock-context.json"
+  ],
+  "type": ["VerifiableCredential"],
+  "issuer": {
+    "id": "did:personal345",
+    "name": "Kiyana"
+  },
+  "issuanceDate": "2022-12-01T00:00:00Z",
+  "credentialSubject": {
+    "id": "did:ngo123",
+    "type": ["LinkedClaim", "Impact"],
+    "effectiveDate": "2022-11-01", 
+    "statement": "NGO Helpers Intl got me a smart phone and wifi access.",
+    "impactClaim": {
+        "type": "ImpactClaim",
+        "impactType": "direct",
+        "price": "200",
+        "priceCurrency": "USD",
+        "recipient": "did:personal345"
+    },
+
+    "source": {
+         "type": "ClaimSource",
+         "id": "did:personal345",
+         "sourceType": "firstHand",
+         "dateObserved": "2022-11-01"
+      }
+    }
+}
+
+ngo-recipient-attestation.json.signed:
+{"@context":["https://www.w3.org/2018/credentials/v1",{"LinkedClaim":{"@context":{"aspect":{"@id":"lc:aspect"},"claim":{"@id":"lc:claim"},"confidence":{"@id":"lc:confidence"},"digestMultibase":{"@id":"http://cooperation.org/credentials#digestMultibase"},"effectiveDate":{"@id":"lc:effectiveDate","@type":"xsd:dateTime"},"id":"@id","intendedAudience":{"@id":"lc:intendedAudience"},"lc":"http://cooperation.org/credentials","object":{"@id":"lc:object"},"respondAt":{"@id":"http://cooperation.org/credentials/v1#respondAt","@type":"@id"},"source":{"@id":"lc:source","@type":"lc:ClaimSource"},"statement":{"@id":"lc:statement"}},"@id":"http://cooperation.org/credentials#LinkedClaim"},"ClaimSource":{"@context":{"author":{"@id":"lc:author","@type":"@id"},"curator":{"@id":"lc:curator","@type":"@id"},"dateObserved":{"@id":"lc:dateObserved","@type":"xsd:dateTime"},"digestMultibase":{"@id":"lc:sourceDigest"},"howKnown":{"@id":"lc:howKnown"},"retrieveFrom":{"@id":"lc:retrieveFrom","@type":"@id"},"sourceType":{"@id":"lc:sourceType"}},"@id":"http://cooperation.org/credentials#ClaimSource"}},{"ImpactClaim":{"@context":{"impactType":{"@id":"http://cooperation.org/credentials/impact#impactType"},"price":{"@id":"http://cooperation.org/credentials/impact#price"},"priceCurrency":{"@id":"http://cooperation.org/credentials/impact#priceCurrency"},"recipient":{"@id":"http://cooperation.org/credentials/impact#recipient"}},"@id":"http://cooperation.org/credentials/impact#ImpactClaim"},"Impact":{"@context":{"impactClaim":{"@id":"http://cooperation.org/credentials/impact#impactClaim","@type":"http://cooperation.org/credentials/impact#ImpactClaim"}},"@id":"http://cooperation.org/credentials/impact#Impact"}}],"type":["VerifiableCredential"],"credentialSubject":{"id":"did:ngo123","effectiveDate":"2022-11-01","type":["LinkedClaim","Impact"],"statement":"NGO Helpers Intl got me a smart phone and wifi access.","source":{"dateObserved":"2022-11-01","id":"did:personal345","sourceType":"firstHand","type":"ClaimSource"},"impactClaim":{"impactType":"direct","price":"200","priceCurrency":"USD","recipient":"did:personal345","type":"ImpactClaim"}},"issuer":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","issuanceDate":"2022-12-01T00:00:00Z","proof":{"type":"Ed25519Signature2018","proofPurpose":"assertionMethod","verificationMethod":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1#z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","created":"2022-12-31T03:14:33.342Z","jws":"eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..JF5iWqNOIMlBr8GbKP90raOoBxmdLQ2B-UiJksOXTMc6lMg6p54OZmrptijQ9-1v5_-1ZRssUE_jUS0Luot8Bw"}}
+
+ngo-staff-claim.json:
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "linked-claim-context.json",
+    "schema-mock-context.json",
+    "impact-mock-context.json"
+  ],
+  "type": ["VerifiableCredential"],
+  "issuer": {
+    "id": "did:employee678",
+    "name": "Angel Smith"
+  },
+  "issuanceDate": "2022-12-01T00:00:00Z",
+  "credentialSubject": {
+    "id": "did:ngo987",
+    "type": ["LinkedClaim", "Impact"],
+    "effectiveDate": "2022-11-01", 
+    "statement": "NGO Fakers Intl made a huge difference to Kiano K who now has a new house and job due to our work.",
+    "impactClaim": {
+        "type": "ImpactClaim",
+        "id": "cid:09871234324",
+        "price": "20000",
+        "priceCurrency": "USD",
+        "impactType":"indirect",
+        "recipient": "did:kiyanok888"
+    },
+    "source": {
+         "type": "ClaimSource",
+         "id": "https://fakers-intl.com/annualReportDetail.pdf",
+         "sourceType": "document",
+         "howKnown": "Kiano K was a recipient of our 2022 project, he was listed in an internal report as receiving this much benefit",
+         "dateObserved": "2022-11-01"
+      }
+    }
+}
+
+ngo-staff-claim.json.signed:
+{"@context":["https://www.w3.org/2018/credentials/v1",{"ClaimSource":{"@context":{"author":{"@id":"lc:author","@type":"@id"},"curator":{"@id":"lc:curator","@type":"@id"},"dateObserved":{"@id":"lc:dateObserved","@type":"xsd:dateTime"},"digestMultibase":{"@id":"lc:sourceDigest"},"howKnown":{"@id":"lc:howKnown"},"retrieveFrom":{"@id":"lc:retrieveFrom","@type":"@id"},"sourceType":{"@id":"lc:sourceType"}},"@id":"http://cooperation.org/credentials#ClaimSource"},"LinkedClaim":{"@context":{"aspect":{"@id":"lc:aspect"},"claim":{"@id":"lc:claim"},"confidence":{"@id":"lc:confidence"},"digestMultibase":{"@id":"http://cooperation.org/credentials#digestMultibase"},"effectiveDate":{"@id":"lc:effectiveDate","@type":"xsd:dateTime"},"id":"@id","intendedAudience":{"@id":"lc:intendedAudience"},"lc":"http://cooperation.org/credentials","object":{"@id":"lc:object"},"respondAt":{"@id":"http://cooperation.org/credentials/v1#respondAt","@type":"@id"},"source":{"@id":"lc:source","@type":"lc:ClaimSource"},"statement":{"@id":"lc:statement"}},"@id":"http://cooperation.org/credentials#LinkedClaim"}},{"Review":{"@context":{"reviewRating":{"@id":"https://schema.org#reviewRating","@type":"https://schema.org#ReviewRating"}},"@id":"https://schema.org#Review"},"ReviewRating":{"@context":{"bestRating":{"@id":"schema:bestRating"},"ratingAspect":{"@id":"schema:ratingAspect"},"ratingValue":{"@id":"schema:ratingValue"},"schema":"https://schema.org","worstRating":{"@id":"schema:worstRating"}},"@id":"https://schema.org#ReviewRating"},"DonateAction":{"@context":{"price":{"@id":"schema:price"},"priceCurrency":{"@id":"schema:priceCurrency"},"recipient":{"@id":"schema:recipient"},"schema":"https://schema.org"},"@id":"https://schema.org#DonateAction"}},{"ImpactClaim":{"@context":{"impactType":{"@id":"http://cooperation.org/credentials/impact#impactType"},"price":{"@id":"http://cooperation.org/credentials/impact#price"},"priceCurrency":{"@id":"http://cooperation.org/credentials/impact#priceCurrency"},"recipient":{"@id":"http://cooperation.org/credentials/impact#recipient"}},"@id":"http://cooperation.org/credentials/impact#ImpactClaim"},"Impact":{"@context":{"impactClaim":{"@id":"http://cooperation.org/credentials/impact#impactClaim","@type":"http://cooperation.org/credentials/impact#ImpactClaim"}},"@id":"http://cooperation.org/credentials/impact#Impact"}}],"type":["VerifiableCredential"],"credentialSubject":{"id":"did:ngo987","effectiveDate":"2022-11-01","impactClaim":{"id":"cid:09871234324","impactType":"indirect","price":"20000","priceCurrency":"USD","recipient":"did:kiyanok888","type":"ImpactClaim"},"type":["LinkedClaim","Impact"],"statement":"NGO Fakers Intl made a huge difference to Kiano K who now has a new house and job due to our work.","source":{"dateObserved":"2022-11-01","howKnown":"Kiano K was a recipient of our 2022 project, he was listed in an internal report as receiving this much benefit","id":"https://fakers-intl.com/annualReportDetail.pdf","sourceType":"document","type":"ClaimSource"}},"issuer":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","issuanceDate":"2022-12-01T00:00:00Z","proof":{"type":"Ed25519Signature2018","proofPurpose":"assertionMethod","verificationMethod":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1#z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","created":"2022-12-31T03:14:33.436Z","jws":"eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..ivsoIMWdbXpAqeOukAnmwS162r13Xa2Sl1fGRX-WJTZLok24xFOvPZ11QJ7KgVHU8X0XFeGrGo84yV9kb3IPAw"}}
+
+recipient-credibility.json:
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "linked-claim-context.json",
+    "impact-mock-context.json"
+  ],
+  "type": ["VerifiableCredential"],
+  "issuer": {
+    "id": "did:Filbert999",
+    "name": "Filbert"
+  },
+  "issuanceDate": "2022-12-01T00:00:00Z",
+  "credentialSubject": {
+    "id": "did:kiyano888",
+    "type": ["LinkedClaim", "Impact"],
+    "effectiveDate": "2022-11-01", 
+    "claim": "rating",
+    "statement": "Kiyano helped me to pay my rent one month.  He is a good guy.",
+    "impactClaim": {
+        "type": "ImpactClaim",
+        "id": "cid:asdf978897",
+        "price": "100",
+        "priceCurrency": "USD",
+        "recipient":"did:Filbert999"
+    },
+    "source": {
+         "type": "ClaimSource",
+         "id": "did:Filbert999",
+         "sourceType": "firstHand",
+         "dateObserved": "2022-11-01"
+      }
+    }
+}
+
+recipient-credibility.json.signed:
+{"@context":["https://www.w3.org/2018/credentials/v1",{"LinkedClaim":{"@context":{"aspect":{"@id":"lc:aspect"},"claim":{"@id":"lc:claim"},"confidence":{"@id":"lc:confidence"},"digestMultibase":{"@id":"http://cooperation.org/credentials#digestMultibase"},"effectiveDate":{"@id":"lc:effectiveDate","@type":"xsd:dateTime"},"id":"@id","intendedAudience":{"@id":"lc:intendedAudience"},"lc":"http://cooperation.org/credentials","object":{"@id":"lc:object"},"respondAt":{"@id":"http://cooperation.org/credentials/v1#respondAt","@type":"@id"},"source":{"@id":"lc:source","@type":"lc:ClaimSource"},"statement":{"@id":"lc:statement"}},"@id":"http://cooperation.org/credentials#LinkedClaim"},"ClaimSource":{"@context":{"author":{"@id":"lc:author","@type":"@id"},"curator":{"@id":"lc:curator","@type":"@id"},"dateObserved":{"@id":"lc:dateObserved","@type":"xsd:dateTime"},"digestMultibase":{"@id":"lc:sourceDigest"},"howKnown":{"@id":"lc:howKnown"},"retrieveFrom":{"@id":"lc:retrieveFrom","@type":"@id"},"sourceType":{"@id":"lc:sourceType"}},"@id":"http://cooperation.org/credentials#ClaimSource"}},{"Impact":{"@context":{"impactClaim":{"@id":"http://cooperation.org/credentials/impact#impactClaim","@type":"http://cooperation.org/credentials/impact#ImpactClaim"}},"@id":"http://cooperation.org/credentials/impact#Impact"},"ImpactClaim":{"@context":{"impactType":{"@id":"http://cooperation.org/credentials/impact#impactType"},"price":{"@id":"http://cooperation.org/credentials/impact#price"},"priceCurrency":{"@id":"http://cooperation.org/credentials/impact#priceCurrency"},"recipient":{"@id":"http://cooperation.org/credentials/impact#recipient"}},"@id":"http://cooperation.org/credentials/impact#ImpactClaim"}}],"type":["VerifiableCredential"],"credentialSubject":{"id":"did:kiyano888","type":["LinkedClaim","Impact"],"source":{"dateObserved":"2022-11-01","id":"did:Filbert999","sourceType":"firstHand","type":"ClaimSource"},"impactClaim":{"id":"cid:asdf978897","price":"100","priceCurrency":"USD","recipient":"did:Filbert999","type":"ImpactClaim"},"claim":"rating","statement":"Kiyano helped me to pay my rent one month.  He is a good guy.","effectiveDate":"2022-11-01"},"issuer":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","issuanceDate":"2022-12-01T00:00:00Z","proof":{"type":"Ed25519Signature2018","proofPurpose":"assertionMethod","verificationMethod":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1#z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","created":"2022-12-31T03:14:33.530Z","jws":"eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..Ez2J6KfZ9OInsmR-YqFStJQThSQFF1gzV0XjrH7ACH--2DI1h6rnUBzENlx_NhsvuennUV9s2Fxi30oZk8Y7Bw"}}
+
+7.worker-reputation: it has 2 files:
+joe.json:
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "linked-claim-context.json",
+    "schema-mock-context.json"
+  ],
+  "type": ["VerifiableCredential"],
+  "issuer": {
+    "id": "did:spider123",
+    "name": "ClaimSpider"
+  },
+  "issuanceDate": "2022-01-01T00:00:00Z",
+  "expirationDate": "2025-01-01T00:00:00Z",
+  "credentialSubject": {
+    "id": "did:joe123",
+    "type": ["LinkedClaim", "Review"],
+    "effectiveDate": "1999-01-01", 
+    "statement": "Joe has earned an overall rating on Upwork from 11 client reviews",
+    "reviewRating": {
+        "type": "ReviewRating",  
+        "ratingValue": 4.8,
+        "bestRating": 5,
+        "worstRating": 1
+    },
+    "source": {
+         "type": "ClaimSource",
+         "id": "https://upwork.com/profile/joe12345",
+         "digestMultibase": "asdfb897987",
+         "retrieveFrom": ["https://upwork.com/profile/joe12345", "https://linkedtrust.us/snapshots/upwork-profile-joe12345-poiuweri"],
+         "sourceType": "web",
+         "howKnown": "The user proved ownership of this profile via magic key",
+         "dateObserved": "2021-12-01",
+         "curator": "https://upwork.com",
+         "author": "https://upwork.com/clients/client456"
+      }
+    }
+}
+
+joe.json.signed:
+{"@context":["https://www.w3.org/2018/credentials/v1",{"LinkedClaim":{"@context":{"aspect":{"@id":"lc:aspect"},"claim":{"@id":"lc:claim"},"confidence":{"@id":"lc:confidence"},"digestMultibase":{"@id":"http://cooperation.org/credentials#digestMultibase"},"effectiveDate":{"@id":"lc:effectiveDate","@type":"xsd:dateTime"},"id":"@id","intendedAudience":{"@id":"lc:intendedAudience"},"lc":"http://cooperation.org/credentials","object":{"@id":"lc:object"},"respondAt":{"@id":"http://cooperation.org/credentials/v1#respondAt","@type":"@id"},"source":{"@id":"lc:source","@type":"lc:ClaimSource"},"statement":{"@id":"lc:statement"}},"@id":"http://cooperation.org/credentials#LinkedClaim"},"ClaimSource":{"@context":{"author":{"@id":"lc:author","@type":"@id"},"curator":{"@id":"lc:curator","@type":"@id"},"dateObserved":{"@id":"lc:dateObserved","@type":"xsd:dateTime"},"digestMultibase":{"@id":"lc:sourceDigest"},"howKnown":{"@id":"lc:howKnown"},"retrieveFrom":{"@id":"lc:retrieveFrom","@type":"@id"},"sourceType":{"@id":"lc:sourceType"}},"@id":"http://cooperation.org/credentials#ClaimSource"}},{"DonateAction":{"@context":{"price":{"@id":"schema:price"},"priceCurrency":{"@id":"schema:priceCurrency"},"recipient":{"@id":"schema:recipient"},"schema":"https://schema.org"},"@id":"https://schema.org#DonateAction"},"Review":{"@context":{"reviewRating":{"@id":"https://schema.org#reviewRating","@type":"https://schema.org#ReviewRating"}},"@id":"https://schema.org#Review"},"ReviewRating":{"@context":{"bestRating":{"@id":"schema:bestRating"},"ratingAspect":{"@id":"schema:ratingAspect"},"ratingValue":{"@id":"schema:ratingValue"},"schema":"https://schema.org","worstRating":{"@id":"schema:worstRating"}},"@id":"https://schema.org#ReviewRating"}}],"type":["VerifiableCredential"],"credentialSubject":{"id":"did:joe123","source":{"author":"https://upwork.com/clients/client456","curator":"https://upwork.com","dateObserved":"2021-12-01","digestMultibase":"asdfb897987","howKnown":"The user proved ownership of this profile via magic key","id":"https://upwork.com/profile/joe12345","retrieveFrom":["https://upwork.com/profile/joe12345","https://linkedtrust.us/snapshots/upwork-profile-joe12345-poiuweri"],"sourceType":"web","type":"ClaimSource"},"type":["LinkedClaim","Review"],"reviewRating":{"bestRating":5,"ratingValue":4.8,"type":"ReviewRating","worstRating":1},"statement":"Joe has earned an overall rating on Upwork from 11 client reviews","effectiveDate":"1999-01-01"},"issuer":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","issuanceDate":"2022-01-01T00:00:00Z","proof":{"type":"Ed25519Signature2018","proofPurpose":"assertionMethod","verificationMethod":"did:key:z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1#z6MkqmK65rR12feeNgu9foTvzxcSidCwegGzTtAjVk95att1","created":"2022-12-31T03:14:33.622Z","jws":"eyJhbGciOiJFZERTQSIsImNyaXQiOlsiYjY0Il0sImI2NCI6ZmFsc2V9..iWvoeB5PsDN39H-e_UcAImcOY28lyEecqzsp5lS3gCa1kuKhInVAecjqksqMZpcnkMJuE4TDBWPPE9F3Kz2zCw"},"expirationDate":"2025-01-01T00:00:00Z"}
+
+Product Review Product review scraped from existing site
+Self-Asserted Skill Worker asserting skills and receiving recommendations from colleagues
+Social Impact NGO recipients attesting to impact
+Worker Reputation Worker exporting their earned reputation from a gig site
+Real World Harm A real life example of a student activist disappeared in Myanmar, and the connected claim that POSCO still does business with the military junta, using a wikipedia URL to identify the junta in both claims.
+This repo is normally mirrored at both https://github.com/Cooperation-org/LinkedClaims and https://codeberg.org/cooperation/LinkedClaims
+
+The context and examples here came out of a draft paper at RWoT : Composable Credentials and from some design work at http://cooperation.org/linked_trust
+
+
+     
+     
+                           
+
+
+
+
+
+

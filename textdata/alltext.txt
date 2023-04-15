@@ -1,0 +1,309 @@
+What's Cookin' is a Benefit Corporation, with a mission of enhancing Cooperation between people. Founded by Golda velez
+Golda velez is the founder of whatscookin
+Websites: whatscookin.us, cooperation.org, couponsforgood.us(soon to be linkedtrust.us)
+
+Read about Linked Trust
+Linked Trust in a Decentralized World
+Trust is a primitive. That is, assertions or claims about entities are essential components of any healthy system of interacting entities. Without this capability, bad actors will proliferate: spammers, scammers, hackers, viruses, compromised nodes and decayed or broken endpoints. Weyl, Ohlhaver & Buterin address trust in the wallet-owning crypto ecosystem with Soul-Bound Tokens, or SBTs. This is a promising step.
+A widely used, heterogeneous trust network will be more robust against attack, and will enable important but rare applications.
+Self-signed claims can act as a form of SBT but can also be applied to device ids, email addresses, legal corporate entities, product codes, or any other long-lived addressable entity. A common schema for signed trust claims, containing enough information to identify the issuer and the context of the claim, creates a powerful tool for coordination against bad actors - or against any actor. Misuse can be reduced by anchoring each user’s view of the network by their direct connections, and by gathering broad signals across domains.
+Spam: marking domains/headers/addresses as spammy, and preventing them from arriving
+For example: positive trust could be assigned if individual opened email and did not trash it, negative if trashed. Detailed claims can be stored in encrypted decentralized storage and only scores extracted as public claims against "spammy" domains or positive claims for "real" domains. This way just normal behavior can automatically provide positive trust claims for legit domains.
+Planned calls only: whitelist any phone number mentioned in an opened email or gcal event
+Static whitelist apps exist to prevent incoming calls from unknown numbers, but this also prevents calls from desired contacts or takes work to whitelist each one. A positive trustclaim can be applied to any phone number in an opened email that was not trashed, or in a calendar event. The details would be private to the user but the score on the phone number could be made public (optionally, or by paid lookup only to prevent sharing of good phone numbers; or, shared only to entities with a sufficiently high non-spam score themselves)
+Verified Philanthropy: impacted recipients verify that social impact is real for them
+In philanthropy large amounts of funds are often spent on administration. Verifying direct impact to the intended target population is important to ensure good use of funds. Combining signed claims with photographic proof such as ProofMode (with metadata from the image) can generate many data points relating to social impact, signed by different recipients. If the recipients ALSO use their id to perform other activities in the graph this will help prevent "cartel" circles of false assertions.
+Work Performed: Peer reviewed work, whether on a task tracker or github, is a useful source of reputation
+Portable reputation based on units of peer reviewed work allow developers and team members to more easily move between projects. It is also possible to verify login on github, upwork or other platforms and import web2 reputation. This can be issued in an NFT into the developer's wallet but also can be used as an input to other trust score generation.
+Server Reliability: It is possible to use the same format for recording data about servers and network nodes
+In a decentralized network, the "bad actors" are servers or nodes that are unreliable, or worse, have some corrupted data or have been hacked. Allowing network nodes to automatically issue an claim about a node that fails a reliability or verification check can create an automated network to solve the byzantine generals problem. Essentially it is a decentralized gossip network.
+Key points:
+The granular signed trust claims act like a kafka event stream essentially - immutable stream of signed claims written to some decentralized storage. If Ceramic is used as the data layer, then the updates will be on libp2p. However the important thing is that the trustclaims are published and can be subscribed to in some manner, or at least spidered and scraped (which if the subject is a URI should be easy to do).
+Trust claims can be linked. The issuer of a claim who signs it can also be the subject of a claim. A claim may also be a relationship, ie that two identifiers have common control or are same_as.
+Models aggregate claims. Alternate models can be generated from the same data pool of linked trust claims, and their predictions can be evaluated.
+Aggregators can protect privacy. In many cases the granular claims should not be exposed publicly. However the trust predictions from aggregated claims may be valuable and acceptable to share. Some nodes will therefore have private trust claim data stores but will produce predictive output from a combination of private and public data.
+It is likely that a step of normalization and entity resolution will be required to build a useful graph from the initial signed claims. The outputs of a model based on a claim graph can themselves be issued as claims of trust estimates, with the possibility to expose the edges of the graph that led to the result.
+
+Join our community events app: join.whatscookin.us 
+
+Github Orgs: Whats-Cookin and Cooperation-org 
+
+See Budgets and Payments to learn how equity and payments work!
+Budgets and Payments
+We are committed to transparency - you can always know how much money we have, and to see what we spend it by examining the labels in taiga.  We also do periodic participatory budgeting.
+How much can I earn?
+Payment is always based on completed tasks in Taiga, that are in the Review or Done column.  All tasks must contain deliverables:  a link to a PR, to a google doc, the URL of a social media post, etc.  What is it that got accomplished, and where is it?
+We have two kinds of folks on the team, those on fixed budget and floaters.  If you have been given a fixed budget, then you can allocate it onto your own tasks, that is, to place GREEN labels on them with '$25' or whatever.  If you have not been given a budget, or if you need to go over budget, then you need a team lead to authorize the expenditure by task.
+It is up to you to make your tags add up to equal or less than the budget you have been authorized for the week.  If you work on additional items they should be labeled 'onlyCOOK', and you will get equity for them.   (You will also get some equity for the paid tasks; see below)
+Remember to also set the story points equal to the number of hours worked on each task.  These will later translate to equity.
+How do I decide what to work on?
+At the beginning of each week we have an all-devs meeting on Monday mornings at 8AM.  That is where we generally set the development priorities for the week.  Marketing and Design may meet separately but the leads generally join this meeting as well.  
+You may have a combination of long term tasks and short term requests, try to balance those and ask your team lead if you are not sure the priority.  You may get requests from other teams and members, and you should let them know if this request is practical for you or not.  If a request is big make sure to check if it is really a priority.  
+Keep an eye on Epics and Roadmap, these are the bigger picture efforts we are making.  You can work with your lead to write an epic as well!
+How and when do I get paid?
+When you started, you should have filled out the payment methods form.  Note that some methods are higher overhead than others.  ETH/BTC are a last resort, but we can use them if necessary!
+The tasks in Review and Done columns are added up every Friday and will be marked with purple "pq" tag.  We try to get payments out on Monday, if there are any issues you can reach out in #accounting channel or privately on slack.
+What happens to paid work in Review?  What if I need to make changes?
+So its important to get your work reviewed, fixed and approved every week - we do not want tasks hanging around in Review with comments on them.  Please prioritize getting these done and cleared out as soon as possible.
+If you need to do significant work on a task that has already been paid, then you should add a second task labeled "changes on ._" with the number or title of the original task, and with a link to it in the description.  Additional budget may be placed on the changes task, and it should move to Done when the original is approved.
+How do tasks move from Review to Done? 
+Coding tasks move when the PR is approved and merged.
+Design tasks move when the design is approved.  For very small changes, the developer or requestor may approve.  Anything that impacts user flow (which is most designs) should be approved by one of Golda, Caro or Mili.  (this may change). Also please always post the link to the task in the #design slack channel so people can look, who may not be watching Taiga.    Make sure the development team is aware when your design task is approved so they can start implementing it.
+Marketing tasks move when the post is made or the draft is reviewed.  If the task was to actually send out communication, the task is done when the external communication or post goes out.  Please mark external communication tasks with a PURPLE label. 
+Internal documents and drafts are done when they had a second pair of eyes on them, or for small ones just when you have completed them.  If they are for long term use please place a link in the wiki!  Please mark internal tasks with a YELLOW label.  
+The goal is to have at least half PURPLE labels each week!
+Administration or Accounting tasks are done when the internal document is created or updated.  These are the only tasks that may not have a deliverable link.
+Where's my Equity?
+We are in the process of formalizing the equity into tokens, and have an updated spreadsheet tracking the amount everyone has earned to our best estimate up to Jan 1.
+From Jan 1 forward, we agreed to go back to marking each task in Taiga with COOK labels as well as $ labels.
+We don't have infinite COOK!  So people will be assigned budgets the same as with dollars, except that you will have some to budget on yourself, and some you can put on other people's tasks, like to pay other team members with COOK for things you think need to get done.  
+We will be emailing out the budgets individually. If you do not have one, you can ask, it might be that if you are new your COOK will be assigned to you by others and you don't have your own budget yet.  
+The COOK will turn into Option Tokens on our investment dashboard AND also convert to TEAMCOOK governance tokens.  For the governance tokens we may have a multiplier that limits how much new governance can be issued each month, depending on what we agree on.  
+The Option Tokens should appear soon on our dashboard invest.whatscookin.us.  Note that they work like stock options - you would still have to pay a small amount to get the actual COOK token - this is to avoid tax liability.  In about 12 months you should be able to sell your COOK tokens (at full price) to other investors if you want to!  You also never have to exercise your options, you can just keep them around if you like.
+Everyone up to this point has opted to receive Option Tokens instead of direct COOK.  If you are not worried about tax liability and just want direct COOK tokens please let Rosa know.
+Note that everyone with over 5% of equity at the time we launched the dashboard received honest-to-goodness stocks, from the tiny amount of stock we issued, which gives you some legal control over the company along with the board of directors and the bylaws.  We are planning to move to a more fluid DAO model sometime in the future based on the option tokens, and to enshrine this in the bylaws.  For now we lean on a culture of transparency and voting in meetings!
+
+Designers, developers, marketing, business development, grant-writers and neighborhood champions welcome. We share equity and have a commitment to work-weighted democratic governance.
+
+Also, we invite you to know the articles written by @gvelez17, these can be very useful for you:
+Playing on an Organic Team By Golda Velez December 13, 2021
+The web is littered with articles on empowering employees and bottom-up management. Much of it feels like lip service, when in the end upper management hires, fires and controls the budget. True empowerment and bottom-up accountability are worth aiming for; yet on a day to day basis, decisions and goals need to be unified in order to accomplish anything.
+WhatsCookin’ is not a typical top-down corporation, but neither are we a cooperative, with one person-one vote. Organic is a good descriptor for how we work, as ideas emerge and grow if they prove valuable, and those who prove themselves by working gain more say over time.
+Here is how we currently approach the goal of vigorous and empowered team, and what it means to join us.
+Work Talks
+Work is respected at WhatsCookin’ in a few concrete ways:
+budget is justified by placing amounts on peer-reviewed tasks that are transparent to all
+when big decisions are being made, we take a work-weighted vote (and may also take a per-person vote)
+work on approved tasks will be translated into voting tokens
+We do have leads who have the authority to approve tasks, but as described below they have accountability to the team.
+Rather than delegating tasks, leads may offer them in slack and you can volunteer (ie answer in slack and self-assign in Taiga). Since many of us are working for equity, people have a good deal of flexibility as to which tasks they want to take on.
+Anyone may also propose tasks, that they think are useful and wish to do, and see if there is agreement that they are worth spending money or equity on. Your responsibility can grow organically, and if we have funds for it then your budget may grow as well.
+Once a task is accepted it must be completed in the timeline or any blockers should be promptly brought up. Failure to do so may result in the reduction of the member’s budget.
+Commanders Community Intent
+I once worked for a startup that used the method “Commander’s Intent” which originated with the Israeli army. The idea was that the execs established the goals, and we had a great deal of individual flexibility of how to try to achieve them.
+In the case of WhatsCookin’, our fundamental goal is to build community through real time events. Medium term, we have a roadmap for architecture, design and outreach objectives that keep us aligned. Fundamentally, we have some core “north star” values:
+service: serve our users’ intentions and larger goals – do not try to control them
+honesty: transparency with our team and our larger community
+inclusion: while keeping out bad actors and allowing private groups, generally we want all people to feel invited and included
+positive impact: we want to create connections and events that lift people up, enhance their lives, open opportunities, and empower them to achieve their goals
+In addition, we should keep in mind essential objectives to succeed:
+reach and engage users: to do any of the above, we need to reach people
+earn revenue: to continue our work, we need a growing revenue stream
+Within that framework, members are invited and welcome to propose what they think are the most useful next steps, to achieve the larger goal or the nearer objectives, or even to propose new objectives.
+Seek Critique and Objections – not Permission
+In an environment where anyone may propose a next step, it is especially essential to actively see critique. Any idea, to go forward, should receive critical feedback in several key respects:
+is it in line with our core values?
+is it advancing our core objectives, or is it a distraction?
+did you think about it from the perspective of the user?
+have you found the simplest possible way to try it out?
+are you doing it in a general way that is extensible?
+did you check if someone is already working on something related?
+will we be able to tell if it is useful? how will we measure it?
+It is not necessary to get permission from a specific person to go forward with a new idea, but you should make sure that you got critical feedback from teammates and that leads had a chance to object.
+Note that most members are self-assigning their budget onto the tasks they take on.
+Check for Breadcrumbs, and Leave Them
+When writing new code, one of the key questions is where does it go, and how will it be called? Existing code should always be searched and examined for similar work, and existing patterns should be respected.
+When starting new projects, you should search for existing work in a few places:
+The wiki: http://taiga.whatscookin.us/project/epics/wiki/home?_ga=2.52340393.1262332870.1679647360-2016580765.1673351927
+Taiga tasks: http://taiga.whatscookin.us/?_ga=2.115329671.1262332870.1679647360-2016580765.1673351927
+Google drive (technical architecture docs may also be here): https://drive.google.com/drive/u/0/folders/1zemSKWbT1bLUpYAd8QAerTVD_YJjY9Dn
+Github (if it is code): https://github.com/Whats-Cookin
+Figma (for designers): https://www.figma.com/files/team/888812837450917051/Whats-Cookin
+Slack can also be searched but we are not paying to archive all messages, so it is less useful. Be sure to search for the general purpose and area your project pertains to. Be aware of the top level documents for your team – these are linked from the wiki.
+Our goal is that everything you need to know should be findable by starting from the wiki.
+This means, that when you start your project, it should also have breadcrumbs back. If it is a draft or proposal it may be a google document, but should be linked from a taiga task, and the document should be placed in an existing team folder or subfolder. If you are creating new methods or procedures they should be linked from the wiki.
+This need not take long, but it is important that the next person with the same bright idea be able to find your implementation of it!
+Love Your Children, But Not Too Much
+In a peer-to-peer work environment, no one may be checking that your work is being used optimally – or even at all. If you have done work you think is useful, please pursue handing it off and ensure that it receives attention.
+Designers may need to check with the development leads when they can schedule implementation of a design.
+Marketers who create an event may need to ask others to help promote their event.
+Developers who create a new feature may need to ensure that marketers know about it and communicate it to users.
+Do not assume that others are aware of the neat new thing you just did. Tell them!
+But don’t fall in love: Sometimes, an idea that seemed wonderful will just not prove useful. In this case it is important to accept that your idea may be axed and removed from the product or the plan. That is ok! We cannot advance without trying out many ideas, and only some of them will prove worth keeping.
+Make sure your idea gets noticed and tested, but do not worry if it removed.  A new feature that has no criticism probably was not noticed. Seek Critique applies as much or more after implementation as at the beginning of an idea.  Only make sure it is not ignored!
+Work only has value when it is delivered to the end user.  Make sure yours is delivered.
+Do, Document, Delegate – and Encode
+Trying out new ideas requires close attention, a hands-on approach, and flexibility.
+Once you have figured out a process and pattern, its time to document it so that others can follow the same approach – and possibly encode and automate it.
+This especially applies to communications – we may often start by communicating directly with users, but may need to automate the flow in order to scale.
+It Does Not Exist Until You Measure It
+Astronomers looking for new celestial objects have a saying: if you did not record it when you observed it, it does not exist.
+Similarly, features, events, or ideas are not fully realized unless we have a way to measure what the result was. Some possible methods:
+track in the user analytics(https://analytics.google.com/analytics/web/#/report-home/a205880860w284103386p249844532) if people are seeing it
+if the new feature was supposed to affect a user behavior, say creating twitter handles, see if this behavior increased
+check if it is annoying users – especially any “forcing” behavior, look for dropoffs, or make sure it is included in a user focus check. Try to avoid “forcing” users.
+ask at least 3 teammates to try out the feature, or event, and give quick feedback
+if a large change, did it impact overall user stickiness or virality?
+try it yourself – do not forget to exercise your own creations
+This is currently one of our weakest areas. What can we do to improve it? Would it help to hold regular user focus sessions or regularly recruit new users to walk through the app and comment on usability? Can we gather more data?
+Validate, Experiment & Learn Rapidly
+Launching a startup is always uncertain. It is essential that we do not take any particular approach as dogma, though we should stay true to core values.
+It is critical you understand what you are doing and how it will impact the user. We have less management layers than many orgs, so each person must take responsibility for questioning what you do not understand, and questioning anything that seems to not make sense!
+If something is not working, try to think of what else we can try. If nothing comes to mind, look for resources we can learn from. Always try to talk to end users – people who might benefit from community, or are trying to build it. Ask them what their frustrations and pain points are, and what they would wish for.
+Every one of us can be an ambassador and can bring in new ideas and learnings from our personal community and networks. Have you shown the app to your friends? Did it make sense to them? What actual problems or desires do they have, and how can we help?
+When designing the architecture, try to plan points where experiments can be easily added and removed. Can we try new ideas manually before implementing them in code?
+Improving our own work processes is also important! See recommended books for productivity and process. Pair with other team members to spread skills and learn from each other.
+Servant Leadership and Accountability
+Some people who join our team have great depth of experience and executive ability or talent, which is of course extremely valuable. However, our team is not a place for a new outside executive to come in and “reorg” everyone.
+People with big ideas are absolutely welcome to share them, make proposals and seek critique. If they are good ideas likely they will gain traction and approval.
+The job of a lead is to help team members work with maximum effectiveness.
+Team leads do ensure that the agreed on objectives are being pursued, and are responsible for approval of tasks. Leads are expected to provide critical feedback and to often ask for improvement of tasks, or to redirect an approach to a better architecture, a simpler method. Team members who disagree with a lead should say so openly and give reasons, and others may weigh in, but generally the expectation is that the leads are providing experienced direction for a reason.
+Leads/execs who assign budget or authority are subject to a vote of confidence. Currently leads and budgets are fluidly assigned by the execs but this may change; it has depended on which experienced people are available and are taking on responsibility. The executive assigning budgets must be accountable to the full team via a periodic vote of confidence.
+Responsibility of Reviewer, Task Owner and Peer
+Reviewing tasks promptly is as important as completing them. “Bottleneck at the top” is a real problem. In order that we do not get get delayed, the following are suggested:
+Task owner should ensure that the task aligns with current objectives. If not receiving prior approval, then be sure it is closely aligned.
+Task owner may solicit from critique from peers before submitting for review
+Reviewer should promptly review tasks same day if possible, within 2 days at most. If this cannot be done, please ask for help, or send unaligned tasks to backlog.
+Reviewer should be critical, not rubber-stamp, and freely send back for improvement
+Peers should be friendly, helpful and critical. Make yourself available for teammates with questions or needing peer reviews. Speak up and share your perspective.
+Task Owner should as ask again in channel if work is not reviewed
+Task Owner should ensure work is deployed or adopted after review
+See “Seek Critique” above for criteria. Most important is to think from the perspective of the user, how will this appear to them or impact them?
+What if We Succeed?
+Our goal is to lift up all team members as the company grows. Equity is currently assigned as options and may be purchased and sold on a secondary market to cash in, while work-weighted team governance is retained. As the company grows we hope to increase budgets, salaries and benefits, as well as provide training to help everyone “level-up” to the skills needed in a large, fast-growing enterprise.
+Eventually if we are successful, we may be able to spin off related entities that have shared principles and ownership, that can be independently run. Our long term goal is to spread principled, accountable, team run organizations that cooperate efficiently.
+Now back to work…
+
+How To Jump On A Moving Project By Golda Velez September 5, 2021
+Somewhere along the way, I seem to have become a senior developer. I’m not much faster at coding than I used to be, and I definitely have forgotten more language-specific syntax than I remember. The difference, if there in fact is any, seems to be in knowing the patterns and the norms, having a sense of what paths to use to solve problems and how to find one’s bearings in a new environment. In brief:
+Ask Questions Usefully.
+Omit Needless Words
+Choose Places and Names with Care.
+Exercise is Healthy
+You Will Break Things (and how to be careful)
+You Will Miss Deadlines (propose the simplest possible solution to solve the problem.)
+Unblock Yourself. Find a Next Step.
+Rapid Iteration and Feedback Loops
+Deal Directly with Stakeholders. Ask for the Use Case. Follow Through.
+Keep Learning
+None of this is particularly complicated. So, since our community-building startup What’s Cookin’ welcomes new developers who want to get their feet wet in a real team, I thought it might be useful to write a bit of it down, as a guide for new developers on how to find their balance while jumping on board.
+If you are already an experienced developer, this probably is not the essay for you – though if you want to kibbitz and add your two cents, have at it – comments welcome.
+Ask questions usefully.
+You will get stuck. Despite reading whatever docs are available, googling the errors you run into, and doing your best to read the source and solve your own problems, you will at some point not see a clear path to moving forward in a reasonable amount of time.
+(Caveat – you are never really completely stuck; but if you are having to disassemble the operating system to debug the problem, well, you may not come out of your rabbit hole in this lifetime.)
+At this point, you want help. There is a right way to get help. Two key things to keep in mind are:
+senior dev time is extremely valuable
+whatever issue you ran into, someone else likely has – or will – too
+Therefore, you want to communicate your problem in a way that peers on the team can see as well – especially other junior developers. Possibly one of them knows the solution, and if not, at least when someone helps, the answer will be visible in the shared space (most likely a slack channel).
+Always include the exact error message string (so others can search on the same error), and if any URL is involved include the exact link. Summarize what you already tried. Use “` “` or ` ` quotes in slack. Do share in a channel, do not ping the channel. Wait some amount of time and then ping an individual developer if you did not get a response.
+Rule of thumb: Asking the question should be more work than answering it. A lazy question will get a lazy answer.
+Do not be afraid to admit if you are clueless – just make it clear you need only a clue as to how to proceed.
+Omit Needless Words
+Strunk & White aficionados will recognize this timeless imperative.
+In speech even more than in writing: useful words only. Do not speak in a focused meeting when it does not clearly advance the agenda or add new useful information. Do speak up if you hear something that sounds wrong or misleading, ask why or express an opinion if you feel you have sufficient background. If unsure ask in the parallel text chat or in a slack/discord channel or comment in the document.
+Some meetings are social and relaxed, but many are timeboxed and purposeful. Be aware of the purpose and respect it. If more senior folks or more technical folks are present let them take the lead.
+Space and silence has a place. Do not feel moved to fill it just because it is empty.
+Choose places and names with care.
+Where to put something and what to call it is the first choice you will generally make when doing a new bit of work. These are important choices and worth discussing.
+Check for existing work. Has someone approached this problem before? Perhaps a solution already exists, or a component that should be reused.
+Be predictable. It is more important to put something in the expected place or name it in a standard way than it is to be clever or right. Look for implicit standards and patterns in existing code.
+Name semantically. Naming conventions are how you communicate the intention of your code. Naming is also one of the Three Hard Things in programmingTM.
+Leave breadcrumbs. How will future developers find what you are creating? Should it be linked from a central wiki or doc, or mentioned in a related repo?
+Exercise is Healthy
+Code rots. Documentation rots. That is, if code is not exercised in tests and by users, other changes will occur which will eventually render it invalid. Documentation of how to do something which is separate from the code which actually does the thing, likely will become inaccurate over time as the code changes and the documentation does not.
+The more code or documentation is used, the less it will rot.
+Put instructions as close as possible to the object in question. Write clear and precise error messages. Create feedback paths for users to complain when things are broken.
+You Will Break Things
+The only way not to break anything is never to do any work. This is not recommended.
+The thing to aim for is to notice as early as possible when you have broken something, preferably before you have deployed it to live users.
+Set up a local test environment with test coverage. Run tests on your changes.
+Make minimal changes to solve the problem at hand, unless refactor or new design is clearly called for
+Ensure your changes are backwards compatible. If they are not you must figure out who to notify of them.
+Test in a staging environment
+Notify anyone who may be affected by your changes.
+Be aware of what monitoring and alerting is set up. Will you know if it breaks later?
+And most important:
+When things break, take responsibility immediately, tell people it is broken, and what steps you are taking to fix it.
+You Will Miss Deadlines
+A teammate once said the best way for a software engineer to estimate a completion date, is to make your best estimate and then multiply by three and increment the units (2 hours=>6 days)
+Yet reliability is key, and estimates are necessary. The thing to do is communicate early as soon as you realize your estimate will slip, and give options for simplifying the work if you can to make it happen faster. Let your teammates/manager know if you need help to meet a deadline.
+If you accept a task on our team, it implies you think you can finish it within a week. If you can’t, better not to take the task, give it back, or ask for help. At a minimum an update should be provided within a week on any active task. If the task is too big, create a subtask for yourself.
+Corollary: Always propose the simplest possible solution to solve the problem.
+Unblock yourself. Find a Next Step.
+It will often happen that you do not have a clear next step. Resolving the vagueness is an important skill. Some possibilities:
+You have not been given a task. Look thru the task tracker, see if a task is listed that you can adopt. Let people know in chat that you are available to pick up work. If inspired, make a proposal for an improvement.
+You have a task, but it is vaguely defined. Clarify the use case – what is this really going to be used for? What is the end purpose? How will you evaluate it? The first step may be to draft a design proposal. Provide something concrete and ask for feedback. Example output may be most useful for helping your end users clarify their wishes.
+Having something wrong is the first step to getting something right.
+You have a task, but it seems huge. This is a frequent occurrence! Your first step is to break it up into subtasks. Don’t worry about creating all of them. Create the first one with a clear deliverable and send it to whoever asked you to do the task, or post it to the team channel, that this is how you will start.
+Make decisions for yourself, but let people know what decisions you are making!
+Rapid iteration and feedback loops
+A pattern worth calling out is to speed up iteration time. Often the most valuable step in a problem is to find a way to quickly reproduce it. Set up test harnesses. If you need feedback from a person, try to set up live pairing. Share screen. Meet directly with stakeholders. Do everything you can to get direct rapid feedback to iterate on your solutions.
+In order not to be blocked, you may need to decide on your own how to move forward. Do it! But let people know so they can chime in as needed. Once movement is happening it will be easier to get feedback, people pay attention to moving objects.
+Start with simple sketches and text to get feedback early before investing time in detailed design and code.
+Deal directly with stakeholders. Ask for the use case. Follow Through.
+Ok that was three. But the core principle is to find out who needs this thing, why they need it, and make sure it actually gets to them in the end.
+Finding out what the original need is that drives a project can save huge amounts of time by implementing the minimal solution that actually solves the problem.
+When you return a deliverable, think thru from the perspective of the stakeholders who will actually use it. Will it make sense to them? How will they access it? Make sure your deliverables are sent to the right recipient.
+Keep Learning
+Tracking down nitty gritty problems is learning, and so is studying specific syntax. However it is useful to also keep learning at high levels. Search for resources relating to your language or environment plus “design patterns” or “best practices”. Try to understand the data models, memory management, index and search strategies affecting your problem.
+The end goal: Solving the right problem in the best way in the shortest time.
+Thanks for reading! Hope this is a bit useful, please add your favorite tips for new devs of all types.
+Our legally defined mission, from our articles of incorporation
+The specific public benefit purpose of the corporation is to:
+create opportunities for sharing and commerce within communities, support local food production, increase neighborhood resiliance, demonstrate methods of democratic corporate governance, and share equity with participants
+And also to:
+enhance opportunities in underserved communities, including but not limited to refugee families, undocumented individuals, low-income neighborhoods, and communities outside of the United States; and to increase civic engagement and foster conversations around issues of public interest
+Draft statement of values and motivations: Why What's Cookin:
+When we started What’s Cookin’ in 2019, we aimed to address problems of social isolation and fragmentation.  Now at the end of 2020, it is clear that these issues are part of a fundamental threat to our society, along with disinformation and divisiveness.  Broad agreement exists that a problem exists, that a new solution is called for.   
+How then to take the concepts of cooperation, trust and connection, and turn them into a thing?  In today’s world, an app, one that will have mass appeal in neighborhoods and communities worldwide?  And how to make the concept of shared ownership into a reality?
+Start with Meal Sharing
+Food, the experience of eating a meal, is universal.  Providing food for each other and sharing meals has been a fundamental driver for forming bonds since humans lived in small tribes depending on one another for survival.  Breaking bread is a symbol of forging connections.
+Yet, many food-related startups aim to create an anonymized marketplace around eating, reducing it to yet another consumer item.  Increases in convenience from microwave dinners to drive-throughs and now delivery services have failed to deliver the missing value of genuine human connectedness that used to be associated with meals.  Breaking bread is broken.
+Not all values lend themselves to a marketplace model.  One does not achieve genuine human connection by optimizing interactions on a moment to moment basis.  And while tweaking algorithms and feedback loops to be more sensitive to deeper intentions of the users may help, the deeper intentions of the corporate owners must also be taken into account.   Yet another startup trying to monetize human connection is not a recipe for authenticity.
+At What’s Cookin’, our solution is a community driven model from the ground up, starting with the development team and the corporate structure itself - more about this below.  Our app is centered around capturing the users’ intentions, exposing searches as wishes and requests in community circles, and making it easy for cooks, makers and neighbors to offer what others actually want.
+Design Patterns for Cooperation
+Beyond meal sharing, our larger goal is to make it painless and efficient for people to engage in any kind of cooperative activity. We are actively working with small user groups to find the best flow that facilitates making things happen.
+Some insights so far:
+Searches are wishes - and are exposed to just a big enough circle, to have them filled
+Filling a wish becomes an Offer to anyone with a similar wish
+An Event starts with two users and becomes a public invitation in the circle
+Forgiveness not Permission - allow users to join circles as guests, then become verified
+Search by ‘what, when, where and who’ - expand outward in each dimension until filled
+One size will not fit all - different users have different preferences
+Decentralization is the Future: Users Dislike Silos 
+A key request we have heard from our users is to integrate their experience with all the other ways they already interact, from facebook groups to slack to simple text messages.  Our goal is to serve users’ intentions, rather than control or direct them.   Thus while we are working to deliver an optimized in-app experience, we also intend to support decentralized messaging, possibly through the bluesky protocol, which some of our members have been involved in developing.  
+In the meantime, a message bus with API plugins to reach users where they are comfortable will make it easier to form circles from disparate groups of users.
+Traction and Growth
+A vision and even a working implementation are nothing without users.  Our MVP has been rolled out into a small circle of online activists, and during development usage of the app has doubled about every six weeks.
+Our plan is to grow through partnerships with neighborhood associations, food hubs, community organizers and others with shared values in building community.    Our goal is to be positioned so that as the pandemic ends and people are able to start gathering again, What’s Cookin’ will be the welcome catalyst to bring them together, starting with sharing of meals.
+For cooks, many of whom may be recent immigrants or refugees, we provide a needed source of secondary income as well as a way to interact with the community.    Feeling valued and seen by their neighbors is something many newcomers have expressed a need for in our focus groups.
+The laws regulating "cottage food" vary from state to state.  We are currently in the process of working with state legislators in Arizona on a model law that we hope to bring forward in fall 2021 to expand permissions for home kitchens.  In every state, meal and activity sharing is legal and fully supported; paid transactions will be enabled per-state where they are allowed.
+In many locations, commercial kitchens are available to more serious cooks, either as rental spaces or free via churches and other community organizations.  
+Competitive Landscape
+Relative to competitors, What’s Cookin’ offers a unique combination of community building and meal sharing.  Most competitors treat home cooking or even dining experiences as a commodity, and other community building apps such as NextDoor are primarily just online talk rather than driving concrete cooperation.  Some specialty community building food apps focus specifically on reducing waste, or pairing students and faculty for lunches, but we believe the community sharing  sweet spot has not been hit yet.
+For rapid development, our MVP was created in React over Django (Python).  We are currently working on a mobile-first version of the front end in Flutter.   We currently have implemented Google Calendar, Google Maps and Sendgrid integrations.  Hosting and deployment is via AWS Amplify. The data store is Postgres using AWS RDS.
+As graduates of the Founders Institute we have qualified for AWS startup credits for 2 years.
+Possible future technologies:
+For capturing user intention, voice recognition combined with GPT3 natural language interaction to clarify the user's wishes are an exciting possibility.
+We expect to use AI models to optimize user feeds when presenting new items beyond their existing circles. 
+Decentralized protocols and event feeds may open new opportunities to interact with large communities of existing users.
+Corporate Structure
+What's Cookin' Inc is a Delaware Public Benefit Corporation.  Our registered public benefit is to create opportunities for sharing and commerce within communities, support local food production, increase neighborhood resilience, demonstrate methods of democratic corporate governance, and share equity with participants
+We chose a Benefit Corporation over a C Corporation to create a real commitment to our values, including that of democratic corporate governance with work-weighted participation. While keeping bureaucracy at a minimum, as we grow we may experiment with DAOs, vote of confidence, and other mechanisms to ensure community control.  We currently use SlicingPie.com to share equity and have a public warrant to split the Founder's Pool accordingly.
+We chose a Benefit Corporation over a Nonprofit Foundation, because shared ownership is closer to our values than a board of directors overseeing employees.  A Benefit Corporation also has the ability to grow and evolve as a living entity, including potentially joining a public stock exchange.
+In Six Words or Less
+Too much detail?  Here is What's Cookin' in the form of "Like X, but Y":
+Pinterest but you can eat it
+Nextdoor without the gossip
+Meetup when you feel like it
+If Uber had a Soul
+Join Us
+We are looking for Co-Founders, Investors, Developers and Neighborhood Champions.  Join us in creating the society we want to belong to.
+website: https://whatscookin.us
+instagram: https://www.instagram.com/whatscookinco/
+linkedin: https://www.linkedin.com/company/whats-cookin-inc
+email: founders@whatscookin.us
+We believe that any approach to “fixing society” must arise from fundamental principles: cooperation, trust, connectedness - and a commitment to complete transparency and genuine shared ownership, of whatever the solution is.
+What does that translate to?  Here it is in the form of 
+Alice wants to…
+What We Do
+Alice wants to do something fun or meaningful with her friends - and maybe some new folks. But, she is busy and has only a few minutes to try to pull something together.  Using Whats Cookin, she can see at a glance a list of things that
+her friends are already planning that they'd be happy to have her join
+her friends said they'd like to do, that they didn't make a plan for yet
+her teammates, neighbors and other groups she's joined are planning or thinking of doing
+are going on in her city or virtually that match her interests
+She can add these events to her calendar and/or chat with the person hosting or proposing the event.  The chat will be forwarded to their preferred way of being contacted, whether SMS, email, dweb messaging etc.  Their replies go to the app and are also forwarded to Alice's preferred way of being contacted.
+If none of those things appeal to her, Alice can make her own plan and invite her friends directly.  She can create a new event or click on a public event and make the fact that she is going to it a mini-event in her friend circle.   Or, she can just wish for something to happen and throw it out there to see if someone else wants to help put it together.  
+A circle is a set of members who can see events and wishes that others in the circle create, and who can message other members.  Circles can be public, private or semi-private (anyone can join, but cannot message until confirmed).  A circle generally has a purpose or description of who it is - people in Tucson, people in one neighborhood, employees of X corporation, a mutual aid circle, knitters in San Diego, people with arthritis, etc. 
+When Alice pulls a public event into a private context, the event is really now "Lets go to this show" rather than the show itself, and Alice as the host will get messages about it.  She is hosting "us friends going to this show" rather than hosting the show.
+
