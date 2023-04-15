@@ -19,6 +19,7 @@ Since openai have released a limited amount of tokens so the response will not b
 * It can be trained on any novel or book and then using prompt engineering it can behave like any character from that book
 
 Sources/inspirations:
+
 https://beebom.com/how-train-ai-chatbot-custom-knowledge-base-chatgpt-api/ (For UI)
 https://www.youtube.com/watch?v=EE1Y2enHrcU
 https://blog.devgenius.io/creating-a-chatgpt-based-chatbot-using-in-context-learning-method-17c30ba72f3 (to know more about in-context learning)
