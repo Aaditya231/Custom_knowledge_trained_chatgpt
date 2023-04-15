@@ -9,7 +9,7 @@ Since openai have released a limited amount of tokens so the response will not b
 * Run train.py and it will generate an index.json file
 * The model then uses this index file along with its previous knowledge to generate response
 
-## To test simply run test.py
+## execute test.py to run it in terminal
 
 ## Main.py is used to run the model on local host
 
