@@ -14,11 +14,20 @@ Since openai have released a limited amount of tokens so the response will not b
 This is a sample interface ,it can be modified according to your needs
 <p align="center">
   <img src="images/img_1.png">
-  <img src="images/img_2.png">
 </p>
 
+<p
+  <img src="images/img_2.png">
+</p>
+To get an openai api key 
+<p
+  <img src="images/img_3.png">
+</p>
 ## Main.py is used to run the model on local host
-
+This is the fast api swagger ui
+<p
+  <img src="images/img_4.png">
+</p>
 ## Scopes of use:
 * You can easily create a question and answer bot
 * It can be trained on any novel or book and then using prompt engineering it can behave like any character from that book
