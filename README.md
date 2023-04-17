@@ -11,6 +11,11 @@ Since openai have released a limited amount of tokens so the response will not b
 * The model then uses this index file along with its previous knowledge to generate response
 
 ## execute test.py to run it in terminal
+This is a sample interface ,it can be modified according to your needs
+<p align="center">
+  <img src="images/img_1.png">
+  <img src="images/img_2.png">
+</p>
 
 ## Main.py is used to run the model on local host
 
