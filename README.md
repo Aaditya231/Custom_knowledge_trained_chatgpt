@@ -22,11 +22,13 @@ To get an openai api key
 <p align="center">
   <img src="images/img_3.png">
 </p>
+
 ## Main.py is used to run the model on local host
 This is the fast api swagger ui
 <p align="center">
   <img src="images/img_4.png">
 </p>
+
 ## Scopes of use:
 * You can easily create a question and answer bot
 * It can be trained on any novel or book and then using prompt engineering it can behave like any character from that book
