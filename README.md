@@ -15,16 +15,16 @@ This is a sample interface ,it can be modified according to your needs
 <p align="center">
   <img src="images/img_1.png">
 </p>
-<p
+<p align="center">
   <img src="images/img_2.png">
 </p>
 To get an openai api key 
-<p
+<p align="center">
   <img src="images/img_3.png">
 </p>
 ## Main.py is used to run the model on local host
 This is the fast api swagger ui
-<p
+<p align="center">
   <img src="images/img_4.png">
 </p>
 ## Scopes of use:
