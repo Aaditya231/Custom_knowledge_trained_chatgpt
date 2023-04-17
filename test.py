@@ -5,7 +5,7 @@ import os
 from fastapi import FastAPI
 import json
 from IPython.display import display, Markdown
-os.environ["OPENAI_API_KEY"] = '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'
+os.environ["OPENAI_API_KEY"] = 'your_api_key'
 
 
 # def construct_index(directory_path):
