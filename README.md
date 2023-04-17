@@ -1,7 +1,7 @@
 # Custom_knowledge_trained_chatgpt
 
 I am using in-context learning in order to train chatgpt on custom data that can be anything related to your organization or any text data in general
-I used gpt-3.5-turbo model which is the same model chatgpt is trained on
+I used gpt-3.5-turbo model which is the same model chatgpt is trained on.<p></p>
 We can have our ChatGPT based chatbot, output the correct answers to user questions, even though the answers to these questions were not included in the chatbots/ChatGPT’s training data.
 
 # To train it on your data:
