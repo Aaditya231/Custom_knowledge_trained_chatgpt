@@ -2,7 +2,7 @@
 
 I am using in-context learning in order to train chatgpt on custom data that can be anything related to your organization or any text data in general
 I used gpt-3.5-turbo model which is the same model chatgpt is trained on
-Since openai have released a limited amount of tokens so the response will not be the same as chatgpt but it will be more than enough.
+We can have our ChatGPT based chatbot, output the correct answers to user questions, even though the answers to these questions were not included in the chatbots/ChatGPT’s training data.
 
 # To train it on your data:
 * Get an api key from openai api site and replace your_api_key with that token
