@@ -15,7 +15,6 @@ This is a sample interface ,it can be modified according to your needs
 <p align="center">
   <img src="images/img_1.png">
 </p>
-
 <p
   <img src="images/img_2.png">
 </p>
